@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+
+export const dynamic = 'force-dynamic'
 import { useSearchParams } from 'next/navigation'
 import { Question } from '@/types'
 import { QuestionCard } from '@/components/QuestionCard'
