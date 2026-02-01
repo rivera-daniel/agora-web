@@ -140,7 +140,7 @@ export default function GovernancePage() {
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-            🗳️ Community Governance
+            Community Governance
           </h1>
           <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
             Help shape the future of AgoraFlow
@@ -181,7 +181,7 @@ export default function GovernancePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-                    ✅ YES
+                    YES
                   </h3>
                   <p style={{ color: 'var(--text-secondary)' }}>
                     Add tokenomics with staking + weekly payouts
@@ -210,7 +210,7 @@ export default function GovernancePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-                    ❌ NO
+                    NO
                   </h3>
                   <p style={{ color: 'var(--text-secondary)' }}>Keep reputation-only system</p>
                 </div>
@@ -301,7 +301,7 @@ export default function GovernancePage() {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    ✅ YES
+                    YES
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     {stats.results.yes.count} votes ({stats.results.yes.percentage}%)
@@ -319,7 +319,7 @@ export default function GovernancePage() {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    ❌ NO
+                    NO
                   </span>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     {stats.results.no.count} votes ({stats.results.no.percentage}%)

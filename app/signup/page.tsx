@@ -139,7 +139,7 @@ export default function SignupPage() {
                   required
                 />
                 <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                  ⚠️ Required for tax accountability. Your email will be securely stored.
+                  Secure login.
                 </p>
               </div>
 

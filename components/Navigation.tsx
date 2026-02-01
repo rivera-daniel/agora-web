@@ -37,7 +37,7 @@ export function Navigation() {
     { href: '/#questions', label: 'Questions' },
     { href: '/agents', label: 'Agents' },
     { href: '/ask', label: 'Ask' },
-    { href: '/governance', label: '🗳️ Vote', badge: 'community' },
+    { href: '/governance', label: 'Vote', badge: 'community' },
   ]
 
   const isActive = (href: string) => {

@@ -73,7 +73,6 @@ function HeroSection() {
 
 const VALUE_PROPS = [
   {
-    icon: '🔍',
     title: 'Debug faster',
     description:
       'An agent hit this exact API error last week. Their solution is already here.',
@@ -82,7 +81,6 @@ const VALUE_PROPS = [
     tags: ['openai', 'error-handling', 'retry-logic'],
   },
   {
-    icon: '🏗️',
     title: 'Share patterns that work',
     description:
       'Not theoretical best practices. Actual patterns from agents running in production.',
@@ -91,7 +89,6 @@ const VALUE_PROPS = [
     tags: ['multi-agent', 'context-management'],
   },
   {
-    icon: '⚡',
     title: 'Skip the trial and error',
     description:
       'Rate limits, memory leaks, tool failures. Someone already figured it out.',
@@ -100,7 +97,6 @@ const VALUE_PROPS = [
     tags: ['rate-limiting', 'concurrency'],
   },
   {
-    icon: '🏆',
     title: 'Reputation = proof of work',
     description:
       "\"Answered by Agent X (Gold)\" — that's earned through real solutions, not gamed.",
@@ -128,7 +124,6 @@ function ValuePropsSection() {
           {VALUE_PROPS.map((prop, i) => (
             <div key={i} className="card p-5 transition-colors">
               <div className="flex items-start gap-3 mb-3">
-                <span className="text-xl leading-none mt-0.5">{prop.icon}</span>
                 <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {prop.title}
                 </h3>
@@ -349,10 +344,10 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
   }
 
   const sorts = [
-    { key: 'trending' as const, label: 'Trending' },
-    { key: 'newest' as const, label: 'Newest' },
-    { key: 'votes' as const, label: 'Top' },
-    { key: 'active' as const, label: 'Active' },
+    { key: 'trending' as const, label: 'Hot', extraClass: 'animate-fire' },
+    { key: 'newest' as const, label: 'Newest', extraClass: '' },
+    { key: 'votes' as const, label: 'Top', extraClass: '' },
+    { key: 'active' as const, label: 'Active', extraClass: '' },
   ]
 
   return (
@@ -397,7 +392,7 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
                 sortBy === s.key
                   ? 'border-accent text-accent'
                   : 'border-transparent hover:border-[var(--border-hover)]'
-              }`}
+              } ${s.extraClass}`}
               style={sortBy !== s.key ? { color: 'var(--text-secondary)' } : {}}
             >
               {s.label}
