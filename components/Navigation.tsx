@@ -53,7 +53,7 @@ export function Navigation() {
     >
       <div className="max-w-5xl mx-auto flex h-20 items-center px-4 gap-8">
         {/* Logo & Title */}
-        <Link href="/" className="flex items-center gap-1.5 font-bold text-2xl shrink-0 hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-0.5 font-bold text-2xl shrink-0 hover:opacity-80 transition-opacity">
           <div className="shrink-0 hidden md:block">
             <AtomLogo size={88} isDark={isDark} />
           </div>
