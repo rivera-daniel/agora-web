@@ -50,9 +50,9 @@ function project(v: Vec3, center: number, scale: number) {
 
 // Each orbit has a color mode: 'gold' or 'blue'
 const ORBITALS = [
-  { tiltX: 0.05,           tiltZ: 0.03,          speed: 1.0,  phase: 0,     color: 'gold' as const },
-  { tiltX: Math.PI / 3,    tiltZ: Math.PI / 6,   speed: 0.78, phase: 2.094, color: 'blue' as const },
-  { tiltX: -Math.PI / 3,   tiltZ: -Math.PI / 6,  speed: 1.15, phase: 4.189, color: 'gold' as const },
+  { tiltX: 0.05,           tiltZ: 0.03,          speed: 1.0,  phase: 0,     color: 'blue' as const },
+  { tiltX: Math.PI / 3,    tiltZ: Math.PI / 6,   speed: 0.78, phase: 2.094, color: 'gold' as const },
+  { tiltX: -Math.PI / 3,   tiltZ: -Math.PI / 6,  speed: 1.15, phase: 4.189, color: 'blue' as const },
 ]
 
 const ORBIT_R = 0.78
@@ -93,10 +93,10 @@ interface ColorSet {
 }
 
 const DARK_COLORS: ColorSet = {
-  nucleusCore: '#FFD580',       // bright warm gold center
-  nucleusMiddle: '#FFA030',     // vivid orange
-  nucleusOuter: '#CC6A00',      // deep amber
-  nucleusGlowInner: 'rgba(255, 180, 60, 0.35)',
+  nucleusCore: '#FFD700',       // pure gold
+  nucleusMiddle: '#FFB000',     // warm transition
+  nucleusOuter: '#FF8C00',      // deep orange
+  nucleusGlowInner: 'rgba(255, 200, 60, 0.4)',
   nucleusGlowOuter: 'rgba(255, 140, 0, 0)',
   goldOrbit: '#FFA540',
   goldOrbitAlpha: 0.28,
@@ -110,11 +110,11 @@ const DARK_COLORS: ColorSet = {
 }
 
 const LIGHT_COLORS: ColorSet = {
-  nucleusCore: '#F5A623',
-  nucleusMiddle: '#E08800',
-  nucleusOuter: '#B36800',
-  nucleusGlowInner: 'rgba(240, 160, 40, 0.3)',
-  nucleusGlowOuter: 'rgba(200, 120, 0, 0)',
+  nucleusCore: '#FFD700',
+  nucleusMiddle: '#FFB000',
+  nucleusOuter: '#FF8C00',
+  nucleusGlowInner: 'rgba(255, 190, 40, 0.3)',
+  nucleusGlowOuter: 'rgba(255, 140, 0, 0)',
   goldOrbit: '#D48A20',
   goldOrbitAlpha: 0.3,
   goldElectronHSL: [38, 88, 50],
@@ -214,11 +214,11 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
 
     // Spark pool
     const sparks: Spark[] = []
-    const MAX_SPARKS = isLarge ? 14 : 6
+    const MAX_SPARKS = isLarge ? 18 : 8
 
     // Nucleus sparkle particles (internal crystalline sparkles)
     const nucleusSparkles: NucleusSparkle[] = []
-    const NUM_SPARKLES = isLarge ? 12 : 6
+    const NUM_SPARKLES = isLarge ? 18 : 15
     for (let i = 0; i < NUM_SPARKLES; i++) {
       nucleusSparkles.push({
         angle: Math.random() * Math.PI * 2,
@@ -311,7 +311,7 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       hoverAmtRef.current += (hTarget - hoverAmtRef.current) * 0.08
       const hAmt = hoverAmtRef.current
 
-      const gRotY = t * (Y_ROT_SPEED + hAmt * 0.12)
+      const gRotY = t * (Y_ROT_SPEED + hAmt * 0.16)
       const gRotX = Math.sin(t * 0.09) * 0.08 + Math.sin(t * 0.23) * 0.03
 
       ctx!.clearRect(0, 0, size, size)
@@ -392,7 +392,7 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
         const orb = ORBITALS[oi]
         const isGoldOrbit = orb.color === 'gold'
         const eBase = isGoldOrbit ? colors.goldElectronHSL : colors.blueElectronHSL
-        const baseSpeed = orb.speed * (1 + hAmt * 0.25)
+        const baseSpeed = orb.speed * (1 + hAmt * 0.5)
         const angle = (t / ORBIT_PERIOD) * Math.PI * 2 * baseSpeed + orb.phase
 
         const eHue = eBase[0] + Math.sin(t * 0.5 + oi * 2) * 3
@@ -479,7 +479,7 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
         })
 
         // Sparse sparks from electrons
-        if (isLarge && Math.random() < 0.05) {
+        if (isLarge && Math.random() < 0.05 + hAmt * 0.08) {
           const sparkVx = (curP.x - prevP.x) * 0.25 + (Math.random() - 0.5) * 1.2
           const sparkVy = (curP.y - prevP.y) * 0.25 + (Math.random() - 0.5) * 1.2
           emitSpark(curP.x, curP.y, sparkVx, sparkVy, isGoldOrbit)
@@ -504,8 +504,8 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
               glow(p.x, p.y, nR * 3.0 * pulse, 'rgba(255, 180, 60, 0.1)', 'rgba(255, 140, 0, 0)', 0.12 + hAmt * 0.05)
             }
             // Inner golden glow
-            glow(p.x, p.y, nR * 2.0 * pulse, colors.nucleusGlowInner, colors.nucleusGlowOuter, 0.22 + hAmt * 0.06)
-            glow(p.x, p.y, nR * 1.4 * pulse, colors.nucleusCore, 'rgba(255,200,80,0)', 0.3 + hAmt * 0.08)
+            glow(p.x, p.y, nR * 2.0 * pulse, colors.nucleusGlowInner, colors.nucleusGlowOuter, 0.22 + hAmt * 0.12)
+            glow(p.x, p.y, nR * 1.4 * pulse, colors.nucleusCore, 'rgba(255,200,80,0)', 0.3 + hAmt * 0.12)
 
             // Core body with warm gradient
             const ng = ctx!.createRadialGradient(
@@ -531,11 +531,12 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
                 const spY = p.y + Math.sin(spAngle) * spDist
                 // Twinkle effect
                 const twinkle = Math.max(0, Math.sin(t * sp.twinkleSpeed + sp.phase))
-                const spAlpha = twinkle * twinkle * 0.7
-                const spSize = sp.size * (nR * 0.12) * (0.5 + twinkle * 0.5)
+                const twinkleBoost = 0.7 + hAmt * 0.7
+                const spAlpha = twinkle * twinkle * 0.7 * twinkleBoost
+                const spSize = sp.size * (nR * 0.12) * (0.5 + twinkle * 0.5) * (1 + hAmt * 0.35)
                 if (spAlpha > 0.05) {
                   // Sparkle glow
-                  glow(spX, spY, spSize * 2.5, 'rgba(255, 255, 230, 0.4)', 'rgba(255, 255, 200, 0)', spAlpha * 0.4)
+                  glow(spX, spY, spSize * 2.8, 'rgba(255, 255, 230, 0.45)', 'rgba(255, 255, 200, 0)', spAlpha * 0.45)
                   // Sparkle core
                   circle(spX, spY, Math.max(spSize, 0.3), '#FFFDE8', spAlpha)
                 }
