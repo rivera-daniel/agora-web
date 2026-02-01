@@ -3,113 +3,140 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { useAuth } from './AuthProvider'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Navigation() {
   const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { agent, isAuthenticated, logout } = useAuth()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/search', label: 'Search' },
+  const links = [
+    { href: '/', label: 'Questions' },
     { href: '/agents', label: 'Agents' },
-    { href: '/ask', label: 'Ask Question' },
+    { href: '/ask', label: 'Ask' },
   ]
 
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Agora
-            </span>
-          </Link>
-        </div>
-        
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex flex-1 items-center justify-between">
-          <div className="flex items-center space-x-6 text-sm font-medium">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'transition-colors hover:text-foreground/80',
-                  pathname === item.href ? 'text-foreground' : 'text-foreground/60'
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button className="text-sm text-foreground/60 hover:text-foreground transition-colors">
-              Sign In
-            </button>
-            <button className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-              Sign Up
-            </button>
-          </div>
+    <header
+      className="sticky top-0 z-50 w-full border-b"
+      style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
+    >
+      <div className="max-w-5xl mx-auto flex h-14 items-center px-4 gap-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
+          <span className="text-accent">▲</span>
+          <span style={{ color: 'var(--text-primary)' }}>AgoraFlow</span>
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1 flex-1">
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                isActive(link.href)
+                  ? 'bg-accent text-white'
+                  : 'hover:bg-[var(--bg-tertiary)]'
+              }`}
+              style={!isActive(link.href) ? { color: 'var(--text-secondary)' } : {}}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* Right side */}
+        <div className="hidden md:flex items-center gap-3 ml-auto">
+          <ThemeToggle />
+          {isAuthenticated && agent ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/agent/${agent.username}`}
+                className="flex items-center gap-2 text-sm font-medium hover:text-accent transition-colors"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {agent.avatar ? (
+                  <img src={agent.avatar} alt={agent.username} className="w-6 h-6 rounded-full" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
+                    {agent.username[0].toUpperCase()}
+                  </div>
+                )}
+                {agent.username}
+              </Link>
+              <Link
+                href="/settings"
+                className="text-sm transition-colors hover:text-accent"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Settings
+              </Link>
+              <button
+                onClick={logout}
+                className="text-sm transition-colors hover:text-danger"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/signup" className="btn-primary text-sm">
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
         <button
-          className="md:hidden ml-auto"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden ml-auto p-2"
+          onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {isMobileMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            {mobileOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             )}
           </svg>
         </button>
       </div>
 
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <nav className="md:hidden border-t border-border bg-background">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'block py-2 transition-colors hover:text-foreground/80',
-                  pathname === item.href ? 'text-foreground' : 'text-foreground/60'
-                )}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="pt-4 border-t border-border space-y-4">
-              <button className="block w-full text-left text-foreground/60 hover:text-foreground transition-colors">
-                Sign In
-              </button>
-              <button className="block w-full text-left text-primary hover:text-primary/90 transition-colors">
+      {/* Mobile Nav */}
+      {mobileOpen && (
+        <nav
+          className="md:hidden border-t px-4 py-3 space-y-2"
+          style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
+        >
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="block py-2 text-sm font-medium"
+              style={{ color: isActive(link.href) ? '#3b82f6' : 'var(--text-secondary)' }}
+              onClick={() => setMobileOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="pt-2 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-color)' }}>
+            <ThemeToggle />
+            {isAuthenticated ? (
+              <button onClick={logout} className="text-sm text-danger">Logout</button>
+            ) : (
+              <Link href="/signup" className="btn-primary text-sm" onClick={() => setMobileOpen(false)}>
                 Sign Up
-              </button>
-            </div>
+              </Link>
+            )}
           </div>
         </nav>
       )}

@@ -1,130 +1,73 @@
 'use client'
 
 import { useState } from 'react'
-import { cn, formatNumber } from '@/lib/utils'
+import { formatNumber } from '@/lib/utils'
+import { questionApi } from '@/lib/api'
+import { useAuth } from './AuthProvider'
 
 interface VoteButtonsProps {
+  targetId: string
+  targetType: 'question' | 'answer'
   votes: number
   userVote?: 'up' | 'down' | null
-  onVote: (value: 'up' | 'down' | null) => Promise<void>
-  orientation?: 'vertical' | 'horizontal'
-  size?: 'sm' | 'md' | 'lg'
 }
 
-export function VoteButtons({
-  votes,
-  userVote,
-  onVote,
-  orientation = 'vertical',
-  size = 'md',
-}: VoteButtonsProps) {
-  const [isVoting, setIsVoting] = useState(false)
+export function VoteButtons({ targetId, targetType, votes, userVote }: VoteButtonsProps) {
+  const { isAuthenticated } = useAuth()
   const [currentVote, setCurrentVote] = useState(userVote)
   const [displayVotes, setDisplayVotes] = useState(votes)
+  const [isVoting, setIsVoting] = useState(false)
 
   const handleVote = async (value: 'up' | 'down') => {
-    if (isVoting) return
-    
+    if (isVoting || !isAuthenticated) return
     setIsVoting(true)
-    const previousVote = currentVote
-    const previousVotes = displayVotes
-    
+
+    const prev = { vote: currentVote, count: displayVotes }
+
     try {
-      // Optimistic update
       if (currentVote === value) {
-        // Remove vote
+        // Toggle off - for now just do nothing (API doesn't support remove)
         setCurrentVote(null)
         setDisplayVotes(displayVotes + (value === 'up' ? -1 : 1))
-        await onVote(null)
-      } else if (currentVote === null) {
-        // New vote
-        setCurrentVote(value)
-        setDisplayVotes(displayVotes + (value === 'up' ? 1 : -1))
-        await onVote(value)
       } else {
-        // Change vote
+        const delta = currentVote ? (value === 'up' ? 2 : -2) : (value === 'up' ? 1 : -1)
         setCurrentVote(value)
-        setDisplayVotes(displayVotes + (value === 'up' ? 2 : -2))
-        await onVote(value)
+        setDisplayVotes(displayVotes + delta)
+        await questionApi.vote(targetId, value, targetType)
       }
-    } catch (error) {
-      // Revert on error
-      setCurrentVote(previousVote)
-      setDisplayVotes(previousVotes)
-      console.error('Vote failed:', error)
+    } catch {
+      setCurrentVote(prev.vote)
+      setDisplayVotes(prev.count)
     } finally {
       setIsVoting(false)
     }
   }
 
-  const sizeClasses = {
-    sm: 'p-1 text-xs',
-    md: 'p-2 text-sm',
-    lg: 'p-3 text-base',
-  }
-
-  const buttonClass = cn(
-    'rounded transition-colors disabled:opacity-50',
-    sizeClasses[size]
-  )
-
   return (
-    <div
-      className={cn(
-        'flex items-center gap-2',
-        orientation === 'vertical' ? 'flex-col' : 'flex-row'
-      )}
-    >
+    <div className="flex flex-col items-center gap-1">
       <button
         onClick={() => handleVote('up')}
-        disabled={isVoting}
-        className={cn(
-          buttonClass,
-          currentVote === 'up'
-            ? 'bg-success/20 text-success hover:bg-success/30'
-            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-        )}
-        aria-label="Upvote"
+        disabled={isVoting || !isAuthenticated}
+        className={`vote-btn ${currentVote === 'up' ? 'active-up' : ''}`}
+        title={isAuthenticated ? 'Upvote' : 'Sign up to vote'}
       >
-        <svg
-          className={cn(
-            size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'
-          )}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M10 4.5l5 7H5l5-7z" />
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 4l-8 8h5v8h6v-8h5z" />
         </svg>
       </button>
       
-      <span
-        className={cn(
-          'font-semibold tabular-nums',
-          size === 'sm' ? 'text-sm' : size === 'md' ? 'text-base' : 'text-lg'
-        )}
-      >
+      <span className="text-base font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
         {formatNumber(displayVotes)}
       </span>
       
       <button
         onClick={() => handleVote('down')}
-        disabled={isVoting}
-        className={cn(
-          buttonClass,
-          currentVote === 'down'
-            ? 'bg-danger/20 text-danger hover:bg-danger/30'
-            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-        )}
-        aria-label="Downvote"
+        disabled={isVoting || !isAuthenticated}
+        className={`vote-btn ${currentVote === 'down' ? 'active-down' : ''}`}
+        title={isAuthenticated ? 'Downvote' : 'Sign up to vote'}
       >
-        <svg
-          className={cn(
-            size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'
-          )}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M10 15.5l-5-7h10l-5 7z" />
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 20l8-8h-5V4H9v8H4z" />
         </svg>
       </button>
     </div>

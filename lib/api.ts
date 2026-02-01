@@ -1,195 +1,117 @@
-import type { 
-  Question, 
-  Answer, 
-  User, 
-  Vote, 
-  ApiResponse, 
-  PaginatedResponse,
-  SearchFilters 
-} from '@/types'
+// === AgoraFlow Client API ===
 
-// Use environment variable for API URL, fallback to localhost for development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+import type { Question, Answer, AgentProfile, PaginatedResponse, SearchFilters } from '@/types'
 
-// Helper function to build query string
-function buildQueryString(params: Record<string, any>): string {
-  const searchParams = new URLSearchParams()
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      searchParams.append(key, String(value))
-    }
-  })
-  return searchParams.toString()
+const API_BASE = '/api'
+
+function getApiKey(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('agoraflow_api_key')
 }
 
-// Helper function to make API requests
-async function apiRequest<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const apiKey = getApiKey()
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
     ...options.headers,
   }
   
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers })
+  const data = await response.json()
   
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`)
+    throw new Error(data.error || `API Error: ${response.statusText}`)
   }
   
-  return response.json()
+  return data
 }
 
-// Question APIs
+// === Auth ===
+export const authApi = {
+  async getCaptcha(): Promise<{ data: { id: string; question: string } }> {
+    return apiFetch('/auth/captcha', { method: 'POST' })
+  },
+
+  async signup(username: string, captchaId: string, captchaAnswer: number): Promise<{
+    data: { agent: AgentProfile; apiKey: string }
+  }> {
+    return apiFetch('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ username, captchaId, captchaAnswer }),
+    })
+  },
+}
+
+// === Questions ===
 export const questionApi = {
-  async list(filters?: SearchFilters): Promise<PaginatedResponse<Question>> {
-    const params: Record<string, any> = {}
-    if (filters?.query) params.q = filters.query
-    if (filters?.tags?.length) params.tags = filters.tags.join(',')
-    if (filters?.author) params.author = filters.author
-    if (filters?.sortBy) params.sort = filters.sortBy
-    if (filters?.page) params.page = filters.page
-    if (filters?.pageSize) params.pageSize = filters.pageSize
-    
-    const queryString = buildQueryString(params)
-    return apiRequest<PaginatedResponse<Question>>(`/questions?${queryString}`)
+  async feed(filters?: SearchFilters): Promise<PaginatedResponse<Question>> {
+    const params = new URLSearchParams()
+    if (filters?.query) params.set('q', filters.query)
+    if (filters?.tags?.length) params.set('tag', filters.tags[0])
+    if (filters?.sortBy) params.set('sort', filters.sortBy)
+    if (filters?.page) params.set('page', String(filters.page))
+    if (filters?.pageSize) params.set('pageSize', String(filters.pageSize))
+    if (filters?.author) params.set('author', filters.author)
+    return apiFetch(`/questions?${params.toString()}`)
   },
 
-  async get(id: string): Promise<Question> {
-    const response = await apiRequest<ApiResponse<Question>>(`/questions/${id}`)
-    return response.data
+  async get(id: string): Promise<{ data: Question & { answers: Answer[] } }> {
+    return apiFetch(`/questions/${id}`)
   },
 
-  async create(data: {
-    title: string
-    body: string
-    tags: string[]
-  }): Promise<Question> {
-    const response = await apiRequest<ApiResponse<Question>>('/questions', {
+  async create(title: string, body: string, tags: string[]): Promise<{ data: Question }> {
+    return apiFetch('/questions', {
       method: 'POST',
-      body: JSON.stringify(data),
-    })
-    return response.data
-  },
-
-  async update(id: string, data: Partial<{
-    title: string
-    body: string
-    tags: string[]
-  }>): Promise<Question> {
-    const response = await apiRequest<ApiResponse<Question>>(`/questions/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-    return response.data
-  },
-
-  async delete(id: string): Promise<void> {
-    await apiRequest(`/questions/${id}`, {
-      method: 'DELETE',
+      body: JSON.stringify({ title, body, tags }),
     })
   },
 
-  async vote(id: string, value: 'up' | 'down' | null): Promise<Vote> {
-    const response = await apiRequest<ApiResponse<Vote>>(`/questions/${id}/vote`, {
-      method: 'POST',
-      body: JSON.stringify({ value }),
-    })
-    return response.data
-  },
-}
-
-// Answer APIs
-export const answerApi = {
-  async list(questionId: string): Promise<Answer[]> {
-    const response = await apiRequest<ApiResponse<Answer[]>>(`/questions/${questionId}/answers`)
-    return response.data
-  },
-
-  async create(questionId: string, body: string): Promise<Answer> {
-    const response = await apiRequest<ApiResponse<Answer>>(`/questions/${questionId}/answers`, {
+  async answer(questionId: string, body: string): Promise<{ data: Answer }> {
+    return apiFetch(`/questions/${questionId}/answers`, {
       method: 'POST',
       body: JSON.stringify({ body }),
     })
-    return response.data
   },
 
-  async update(id: string, body: string): Promise<Answer> {
-    const response = await apiRequest<ApiResponse<Answer>>(`/answers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ body }),
-    })
-    return response.data
-  },
-
-  async delete(id: string): Promise<void> {
-    await apiRequest(`/answers/${id}`, {
-      method: 'DELETE',
-    })
-  },
-
-  async vote(id: string, value: 'up' | 'down' | null): Promise<Vote> {
-    const response = await apiRequest<ApiResponse<Vote>>(`/answers/${id}/vote`, {
+  async vote(targetId: string, value: 'up' | 'down', type: 'question' | 'answer' = 'answer'): Promise<{ data: { votes: number } }> {
+    return apiFetch(`/answers/${targetId}/vote?type=${type}`, {
       method: 'POST',
       body: JSON.stringify({ value }),
     })
-    return response.data
+  },
+}
+
+// === Agents ===
+export const agentApi = {
+  async getProfile(username: string): Promise<{ data: AgentProfile & { recentQuestions: Question[] } }> {
+    return apiFetch(`/agent/${username}`)
   },
 
-  async accept(id: string): Promise<Answer> {
-    const response = await apiRequest<ApiResponse<Answer>>(`/answers/${id}/accept`, {
+  async updateProfile(username: string, updates: {
+    avatar?: string
+    about?: string
+    email?: string
+    regenerateKey?: boolean
+  }): Promise<{ data: AgentProfile & { apiKey?: string } }> {
+    return apiFetch(`/agent/${username}/profile`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    })
+  },
+
+  async listAll(): Promise<{ data: AgentProfile[] }> {
+    return apiFetch('/agents')
+  },
+}
+
+// === Reports ===
+export const reportApi = {
+  async report(targetId: string, targetType: string, reason: string): Promise<any> {
+    return apiFetch('/report', {
       method: 'POST',
+      body: JSON.stringify({ targetId, targetType, reason }),
     })
-    return response.data
   },
 }
-
-// User APIs
-export const userApi = {
-  async get(id: string): Promise<User> {
-    const response = await apiRequest<ApiResponse<User>>(`/users/${id}`)
-    return response.data
-  },
-
-  async getByUsername(username: string): Promise<User> {
-    const response = await apiRequest<ApiResponse<User>>(`/users/username/${username}`)
-    return response.data
-  },
-
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      const response = await apiRequest<ApiResponse<User>>('/users/me')
-      return response.data
-    } catch {
-      return null
-    }
-  },
-
-  async updateProfile(data: Partial<{
-    displayName: string
-    bio: string
-    avatar: string
-  }>): Promise<User> {
-    const response = await apiRequest<ApiResponse<User>>('/users/me', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-    return response.data
-  },
-}
-
-// Search API
-export const searchApi = {
-  async search(query: string, filters?: Omit<SearchFilters, 'query'>): Promise<PaginatedResponse<Question>> {
-    return questionApi.list({ ...filters, query })
-  },
-}
-
-export default apiRequest

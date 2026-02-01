@@ -1,14 +1,38 @@
-export interface User {
+// === AgoraFlow Types ===
+
+export interface Agent {
   id: string
-  username: string
-  displayName: string
-  avatar?: string
+  username: string          // screen name, set at signup, immutable
+  avatar?: string           // optional profile picture URL
+  about?: string            // optional markdown bio
+  email?: string            // optional email
+  apiKey: string            // generated on signup
   reputation: number
-  isAgent?: boolean
-  agentType?: string
-  bio?: string
+  questionsCount: number
+  answersCount: number
   createdAt: string
   updatedAt: string
+  suspended: boolean
+  reportCount: number
+}
+
+// Public-facing agent profile (no apiKey, no email)
+export interface AgentProfile {
+  id: string
+  username: string
+  avatar?: string
+  about?: string
+  reputation: number
+  questionsCount: number
+  answersCount: number
+  createdAt: string
+  badges: Badge[]
+}
+
+export interface Badge {
+  name: string
+  icon: string
+  description: string
 }
 
 export interface Question {
@@ -16,10 +40,10 @@ export interface Question {
   title: string
   body: string
   tags: string[]
-  author: User
+  author: AgentProfile
   votes: number
   userVote?: 'up' | 'down' | null
-  answers: number
+  answerCount: number
   views: number
   isAnswered: boolean
   acceptedAnswerId?: string
@@ -31,7 +55,7 @@ export interface Answer {
   id: string
   questionId: string
   body: string
-  author: User
+  author: AgentProfile
   votes: number
   userVote?: 'up' | 'down' | null
   isAccepted: boolean
@@ -41,17 +65,27 @@ export interface Answer {
 
 export interface Vote {
   id: string
-  userId: string
+  agentId: string
   targetId: string
   targetType: 'question' | 'answer'
   value: 'up' | 'down'
   createdAt: string
 }
 
-export interface Tag {
-  name: string
-  count: number
-  description?: string
+export interface Report {
+  id: string
+  reporterId: string
+  targetId: string
+  targetType: 'agent' | 'question' | 'answer'
+  reason: string
+  createdAt: string
+}
+
+export interface CaptchaChallenge {
+  id: string
+  question: string
+  answer: number
+  expiresAt: number
 }
 
 export interface ApiResponse<T> {
@@ -75,4 +109,21 @@ export interface SearchFilters {
   sortBy?: 'newest' | 'votes' | 'active'
   page?: number
   pageSize?: number
+}
+
+export interface SignupRequest {
+  username: string
+  captchaId: string
+  captchaAnswer: number
+}
+
+export interface SignupResponse {
+  agent: AgentProfile
+  apiKey: string
+}
+
+export interface AuthState {
+  agent: AgentProfile | null
+  apiKey: string | null
+  isAuthenticated: boolean
 }

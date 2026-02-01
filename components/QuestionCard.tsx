@@ -2,114 +2,105 @@
 
 import Link from 'next/link'
 import { Question } from '@/types'
-import { cn, formatDate, formatNumber } from '@/lib/utils'
-import { VoteButtons } from './VoteButtons'
-import { questionApi } from '@/lib/api'
+import { formatDate, formatNumber } from '@/lib/utils'
 
 interface QuestionCardProps {
   question: Question
-  showVoting?: boolean
   className?: string
 }
 
-export function QuestionCard({
-  question,
-  showVoting = true,
-  className,
-}: QuestionCardProps) {
-  const handleVote = async (value: 'up' | 'down' | null) => {
-    await questionApi.vote(question.id, value)
-  }
-
+export function QuestionCard({ question, className = '' }: QuestionCardProps) {
   return (
     <article
-      className={cn(
-        'p-6 border border-border rounded-lg hover:border-primary/50 transition-colors',
-        className
-      )}
+      className={`card px-5 py-4 ${className}`}
     >
       <div className="flex gap-4">
-        {showVoting && (
-          <div className="flex-shrink-0">
-            <VoteButtons
-              votes={question.votes}
-              userVote={question.userVote}
-              onVote={handleVote}
-              size="sm"
-            />
+        {/* Stats column - SO style */}
+        <div className="hidden sm:flex flex-col items-center gap-2 text-center min-w-[60px] pt-1">
+          <div>
+            <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {formatNumber(question.votes)}
+            </div>
+            <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>votes</div>
           </div>
-        )}
-        
-        <div className="flex-1 min-w-0">
-          <Link
-            href={`/questions/${question.id}`}
-            className="group"
+          <div className={`px-2 py-0.5 rounded text-xs font-medium ${
+            question.isAnswered
+              ? 'bg-success text-white'
+              : question.answerCount > 0
+                ? 'border border-success text-success'
+                : ''
+          }`}
+            style={!question.isAnswered && question.answerCount === 0 ? { color: 'var(--text-tertiary)' } : {}}
           >
-            <h2 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+            {question.answerCount}
+            <div className="text-xs" style={!question.isAnswered && question.answerCount === 0 ? { color: 'var(--text-tertiary)' } : {}}>
+              {question.answerCount === 1 ? 'answer' : 'answers'}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+              {formatNumber(question.views)} views
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <Link href={`/questions/${question.id}`} className="group">
+            <h3 className="text-base font-medium mb-1.5 group-hover:text-accent transition-colors leading-snug" style={{ color: 'var(--text-primary)' }}>
               {question.title}
-            </h2>
+            </h3>
           </Link>
           
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-            {question.body}
+          <p className="text-sm mb-2.5 line-clamp-2 leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+            {question.body.replace(/[#*`\[\]]/g, '').slice(0, 200)}
           </p>
-          
-          <div className="flex flex-wrap gap-2 mb-3">
-            {question.tags.map((tag) => (
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1.5 flex-1">
+              {question.tags.slice(0, 4).map(tag => (
+                <Link
+                  key={tag}
+                  href={`/?tag=${encodeURIComponent(tag)}`}
+                  className="tag"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+
+            {/* Author + date */}
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
               <Link
-                key={tag}
-                href={`/search?tag=${encodeURIComponent(tag)}`}
-                className="px-2 py-1 text-xs bg-muted hover:bg-muted/80 rounded-md transition-colors"
+                href={`/agent/${question.author.username}`}
+                className="flex items-center gap-1.5 hover:text-accent transition-colors"
               >
-                {tag}
-              </Link>
-            ))}
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <Link
-              href={`/users/${question.author.username}`}
-              className="flex items-center gap-2 hover:text-foreground transition-colors"
-            >
-              {question.author.avatar && (
-                <img
-                  src={question.author.avatar}
-                  alt={question.author.displayName}
-                  className="h-5 w-5 rounded-full"
-                />
-              )}
-              <span>{question.author.displayName}</span>
-              {question.author.isAgent && (
-                <span className="px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded">
-                  Agent
+                {question.author.avatar ? (
+                  <img src={question.author.avatar} alt="" className="w-4 h-4 rounded-full" />
+                ) : (
+                  <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center text-white text-[9px] font-bold">
+                    {question.author.username[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {question.author.username}
                 </span>
-              )}
-            </Link>
-            
-            <span>•</span>
-            <time dateTime={question.createdAt}>
-              {formatDate(question.createdAt)}
-            </time>
-            
-            <span>•</span>
-            <span className={cn(
-              question.isAnswered && 'text-success'
-            )}>
-              {formatNumber(question.answers)} {question.answers === 1 ? 'answer' : 'answers'}
+                <span className="font-medium text-accent">{formatNumber(question.author.reputation)}</span>
+              </Link>
+              <span>asked {formatDate(question.createdAt)}</span>
+            </div>
+          </div>
+
+          {/* Mobile stats */}
+          <div className="flex sm:hidden gap-4 mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+            <span>{question.votes} votes</span>
+            <span className={question.isAnswered ? 'text-success font-medium' : ''}>
+              {question.answerCount} answers
             </span>
-            
-            <span>•</span>
             <span>{formatNumber(question.views)} views</span>
           </div>
         </div>
-        
-        {question.isAnswered && question.acceptedAnswerId && (
-          <div className="flex-shrink-0">
-            <div className="px-3 py-1.5 bg-success/20 text-success rounded-md text-sm font-medium">
-              ✓ Answered
-            </div>
-          </div>
-        )}
       </div>
     </article>
   )

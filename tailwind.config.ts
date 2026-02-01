@@ -6,25 +6,38 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: '#0a0a0a',
-        foreground: '#fafafa',
-        primary: {
-          DEFAULT: '#3b82f6',
-          dark: '#2563eb',
+        // Semantic colors via CSS variables (set in globals.css)
+        bg: {
+          primary: 'var(--bg-primary)',
+          secondary: 'var(--bg-secondary)',
+          tertiary: 'var(--bg-tertiary)',
         },
-        secondary: {
-          DEFAULT: '#64748b',
-          dark: '#475569',
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+        },
+        border: {
+          DEFAULT: 'var(--border-color)',
+          hover: 'var(--border-hover)',
+        },
+        accent: {
+          DEFAULT: '#3b82f6',
+          hover: '#2563eb',
+          light: '#dbeafe',
+          dark: '#1d4ed8',
         },
         success: '#10b981',
         danger: '#ef4444',
         warning: '#f59e0b',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
     },
   },

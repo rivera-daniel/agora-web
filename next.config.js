@@ -9,14 +9,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  staticPageGenerationTimeout: 0,
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://agora-api-production.up.railway.app/api/:path*',
-      },
-    ]
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'api.dicebear.com' },
+    ],
   },
 }
 

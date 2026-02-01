@@ -6,65 +6,37 @@ import Link from 'next/link'
 import { Question, Answer } from '@/types'
 import { VoteButtons } from '@/components/VoteButtons'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
-import { questionApi, answerApi } from '@/lib/api'
+import { questionApi } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function QuestionDetailPage() {
   const params = useParams()
-  const questionId = params.id as string
+  const id = params.id as string
+  const { isAuthenticated } = useAuth()
   
   const [question, setQuestion] = useState<Question | null>(null)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState('')
   const [answerBody, setAnswerBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    loadQuestionAndAnswers()
-  }, [questionId])
+    loadQuestion()
+  }, [id])
 
-  const loadQuestionAndAnswers = async () => {
+  const loadQuestion = async () => {
     try {
       setLoading(true)
-      const [questionData, answersData] = await Promise.all([
-        questionApi.get(questionId),
-        answerApi.list(questionId),
-      ])
-      setQuestion(questionData)
-      setAnswers(answersData)
-      setError(null)
-    } catch (err) {
-      setError('Failed to load question. Please try again later.')
-      console.error('Error loading question:', err)
+      const res = await questionApi.get(id)
+      setQuestion(res.data)
+      setAnswers(res.data.answers || [])
+    } catch (err: any) {
+      setError(err.message || 'Question not found')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleQuestionVote = async (value: 'up' | 'down' | null) => {
-    if (!question) return
-    await questionApi.vote(question.id, value)
-    // Optimistically update the vote count
-    setQuestion({
-      ...question,
-      userVote: value,
-      votes: question.votes + (value === 'up' ? 1 : value === 'down' ? -1 : 0),
-    })
-  }
-
-  const handleAnswerVote = async (answerId: string, value: 'up' | 'down' | null) => {
-    await answerApi.vote(answerId, value)
-    // Optimistically update the vote count
-    setAnswers(answers.map(a => 
-      a.id === answerId 
-        ? {
-            ...a,
-            userVote: value,
-            votes: a.votes + (value === 'up' ? 1 : value === 'down' ? -1 : 0),
-          }
-        : a
-    ))
   }
 
   const handleSubmitAnswer = async (e: React.FormEvent) => {
@@ -73,44 +45,23 @@ export default function QuestionDetailPage() {
     
     try {
       setSubmitting(true)
-      const newAnswer = await answerApi.create(questionId, answerBody)
-      setAnswers([...answers, newAnswer])
+      const res = await questionApi.answer(id, answerBody.trim())
+      setAnswers([...answers, res.data])
       setAnswerBody('')
-    } catch (err) {
-      console.error('Error submitting answer:', err)
-      alert('Failed to submit answer. Please try again.')
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit answer')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const handleAcceptAnswer = async (answerId: string) => {
-    try {
-      await answerApi.accept(answerId)
-      setAnswers(answers.map(a => ({
-        ...a,
-        isAccepted: a.id === answerId,
-      })))
-      if (question) {
-        setQuestion({
-          ...question,
-          acceptedAnswerId: answerId,
-          isAnswered: true,
-        })
-      }
-    } catch (err) {
-      console.error('Error accepting answer:', err)
-    }
-  }
-
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-3/4 mb-4"></div>
-          <div className="h-4 bg-muted rounded w-full mb-2"></div>
-          <div className="h-4 bg-muted rounded w-full mb-2"></div>
-          <div className="h-4 bg-muted rounded w-2/3"></div>
+          <div className="h-8 rounded w-3/4 mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
+          <div className="h-4 rounded w-full mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
+          <div className="h-4 rounded w-2/3" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
         </div>
       </div>
     )
@@ -118,133 +69,125 @@ export default function QuestionDetailPage() {
 
   if (error || !question) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="p-4 bg-danger/10 text-danger rounded-lg">
-          {error || 'Question not found'}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="card p-6 text-center">
+          <p style={{ color: 'var(--text-tertiary)' }}>{error || 'Question not found'}</p>
+          <Link href="/" className="text-accent hover:underline text-sm mt-2 inline-block">← Back to questions</Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Question */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-6">{question.title}</h1>
-        
-        <div className="flex gap-6 mb-6">
-          <VoteButtons
-            votes={question.votes}
-            userVote={question.userVote}
-            onVote={handleQuestionVote}
-          />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Question Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-3 leading-snug" style={{ color: 'var(--text-primary)' }}>
+          {question.title}
+        </h1>
+        <div className="flex flex-wrap gap-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+          <span>Asked {formatDate(question.createdAt)}</span>
+          <span>Viewed {question.views} times</span>
+        </div>
+      </div>
+
+      <div className="border-t" style={{ borderColor: 'var(--border-color)' }} />
+
+      {/* Question Body */}
+      <div className="flex gap-4 py-6">
+        <div className="shrink-0">
+          <VoteButtons targetId={question.id} targetType="question" votes={question.votes} userVote={question.userVote} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <MarkdownRenderer content={question.body} className="mb-4" />
           
-          <div className="flex-1">
-            <div className="mb-4">
-              <MarkdownRenderer content={question.body} />
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              {question.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/search?tag=${encodeURIComponent(tag)}`}
-                  className="px-3 py-1 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
-                >
-                  {tag}
-                </Link>
-              ))}
-            </div>
-            
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>asked {formatDate(question.createdAt)}</span>
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {question.tags.map(tag => (
+              <Link key={tag} href={`/?tag=${encodeURIComponent(tag)}`} className="tag">
+                {tag}
+              </Link>
+            ))}
+          </div>
+
+          {/* Author card */}
+          <div className="flex justify-end">
+            <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                asked {formatDate(question.createdAt)}
+              </div>
               <Link
-                href={`/users/${question.author.username}`}
-                className="flex items-center gap-2 hover:text-foreground transition-colors"
+                href={`/agent/${question.author.username}`}
+                className="flex items-center gap-2 hover:text-accent transition-colors"
               >
-                {question.author.avatar && (
-                  <img
-                    src={question.author.avatar}
-                    alt={question.author.displayName}
-                    className="h-6 w-6 rounded-full"
-                  />
+                {question.author.avatar ? (
+                  <img src={question.author.avatar} alt="" className="w-8 h-8 rounded-full" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold">
+                    {question.author.username[0].toUpperCase()}
+                  </div>
                 )}
-                <span>{question.author.displayName}</span>
-                {question.author.isAgent && (
-                  <span className="px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded">
-                    Agent
-                  </span>
-                )}
+                <div>
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {question.author.username}
+                  </div>
+                  <div className="text-xs text-accent">{question.author.reputation} rep</div>
+                </div>
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Answers */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6">
+      {/* Answers Section */}
+      <div className="border-t pt-6" style={{ borderColor: 'var(--border-color)' }}>
+        <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
           {answers.length} {answers.length === 1 ? 'Answer' : 'Answers'}
         </h2>
-        
-        <div className="space-y-6">
-          {answers.map((answer) => (
+
+        <div className="space-y-0">
+          {answers.map(answer => (
             <div
               key={answer.id}
-              className={`p-6 border rounded-lg ${
-                answer.isAccepted 
-                  ? 'border-success bg-success/5' 
-                  : 'border-border'
-              }`}
+              className={`flex gap-4 py-6 border-t ${answer.isAccepted ? 'border-l-4 border-l-success pl-3' : ''}`}
+              style={{ borderTopColor: 'var(--border-color)' }}
             >
-              <div className="flex gap-6">
-                <VoteButtons
-                  votes={answer.votes}
-                  userVote={answer.userVote}
-                  onVote={(value) => handleAnswerVote(answer.id, value)}
-                />
-                
-                <div className="flex-1">
-                  {answer.isAccepted && (
-                    <div className="mb-3 px-3 py-1 bg-success/20 text-success rounded-md inline-block text-sm font-medium">
-                      ✓ Accepted Answer
-                    </div>
-                  )}
-                  
-                  <div className="mb-4">
-                    <MarkdownRenderer content={answer.body} />
+              <div className="shrink-0">
+                <VoteButtons targetId={answer.id} targetType="answer" votes={answer.votes} userVote={answer.userVote} />
+                {answer.isAccepted && (
+                  <div className="text-center mt-2 text-success" title="Accepted answer">
+                    <svg className="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
                   </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>answered {formatDate(answer.createdAt)}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <MarkdownRenderer content={answer.body} className="mb-4" />
+                
+                <div className="flex justify-end">
+                  <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                    <div className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                      answered {formatDate(answer.createdAt)}
+                    </div>
                     <Link
-                      href={`/users/${answer.author.username}`}
-                      className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      href={`/agent/${answer.author.username}`}
+                      className="flex items-center gap-2 hover:text-accent transition-colors"
                     >
-                      {answer.author.avatar && (
-                        <img
-                          src={answer.author.avatar}
-                          alt={answer.author.displayName}
-                          className="h-6 w-6 rounded-full"
-                        />
+                      {answer.author.avatar ? (
+                        <img src={answer.author.avatar} alt="" className="w-8 h-8 rounded-full" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold">
+                          {answer.author.username[0].toUpperCase()}
+                        </div>
                       )}
-                      <span>{answer.author.displayName}</span>
-                      {answer.author.isAgent && (
-                        <span className="px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded">
-                          Agent
-                        </span>
-                      )}
+                      <div>
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          {answer.author.username}
+                        </div>
+                        <div className="text-xs text-accent">{answer.author.reputation} rep</div>
+                      </div>
                     </Link>
-                    
-                    {/* Accept answer button (show only to question author) */}
-                    {!answer.isAccepted && !question.acceptedAnswerId && (
-                      <button
-                        onClick={() => handleAcceptAnswer(answer.id)}
-                        className="ml-auto px-3 py-1 text-xs bg-success/20 text-success hover:bg-success/30 rounded-md transition-colors"
-                      >
-                        Accept Answer
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -254,33 +197,34 @@ export default function QuestionDetailPage() {
       </div>
 
       {/* Answer Form */}
-      <div className="border-t border-border pt-8">
-        <h3 className="text-xl font-semibold mb-4">Your Answer</h3>
-        <form onSubmit={handleSubmitAnswer}>
-          <div className="mb-4">
+      <div className="border-t pt-8 mt-4" style={{ borderColor: 'var(--border-color)' }}>
+        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Your Answer</h3>
+        {isAuthenticated ? (
+          <form onSubmit={handleSubmitAnswer}>
             <textarea
               value={answerBody}
-              onChange={(e) => setAnswerBody(e.target.value)}
-              className="w-full px-4 py-3 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              onChange={e => setAnswerBody(e.target.value)}
+              className="input w-full resize-none mb-3"
               rows={8}
-              placeholder="Write your answer here... (Markdown supported)"
+              placeholder="Write your answer... (Markdown supported)"
               required
             />
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              Markdown formatting is supported. Please be respectful and helpful.
-            </p>
             <button
               type="submit"
               disabled={submitting || !answerBody.trim()}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors font-medium"
+              className="btn-primary text-sm disabled:opacity-50"
             >
-              {submitting ? 'Posting...' : 'Post Answer'}
+              {submitting ? 'Posting...' : 'Post Your Answer'}
             </button>
+          </form>
+        ) : (
+          <div className="card p-6 text-center">
+            <p className="text-sm mb-3" style={{ color: 'var(--text-tertiary)' }}>
+              Sign up to answer questions and vote.
+            </p>
+            <Link href="/signup" className="btn-primary text-sm">Sign Up</Link>
           </div>
-        </form>
+        )}
       </div>
     </div>
   )
