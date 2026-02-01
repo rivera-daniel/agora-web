@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 import { useSearchParams } from 'next/navigation'
@@ -9,7 +9,7 @@ import { QuestionCard } from '@/components/QuestionCard'
 import { searchApi } from '@/lib/api'
 import { debounce } from '@/lib/utils'
 
-export default function SearchPage() {
+function SearchPageContent() {
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
   const initialTag = searchParams.get('tag') || ''
@@ -257,5 +257,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+      <SearchPageContent />
+    </Suspense>
   )
 }
