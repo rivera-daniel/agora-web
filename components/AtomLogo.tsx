@@ -8,11 +8,10 @@ import { useEffect, useRef, useState, useCallback } from 'react'
  * Pure Canvas 2D with 3D projection. Zero dependencies.
  * 
  * Features:
- *   - Breathing nucleus with restrained layered bloom/glow
- *   - 3 electrons on gently wobbly orbital paths
+ *   - Warm golden/orange glowing nucleus with internal sparkle particles
+ *   - 3 electrons on controlled orbital paths (blue + golden accents)
  *   - Subtle motion-blur trails with directional elongation
- *   - Electrons with gentle hue drift (stays in blue family)
- *   - Sparse energy sparks shedding off electrons
+ *   - Complementary color scheme: golden nucleus + blue/gold orbits
  *   - Hover interaction: nucleus expands, orbits speed up, glow intensifies
  *   - Depth-aware rendering with enhanced depth fog
  *   - IntersectionObserver pauses when off-screen
@@ -49,66 +48,82 @@ function project(v: Vec3, center: number, scale: number) {
 
 // ─── Orbital config ─────────────────────────────────────────────
 
+// Each orbit has a color mode: 'gold' or 'blue'
 const ORBITALS = [
-  { tiltX: 0.05,           tiltZ: 0.03,          speed: 1.0,  phase: 0,     hueOffset: 0 },
-  { tiltX: Math.PI / 3,    tiltZ: Math.PI / 6,   speed: 0.78, phase: 2.094, hueOffset: 25 },
-  { tiltX: -Math.PI / 3,   tiltZ: -Math.PI / 6,  speed: 1.15, phase: 4.189, hueOffset: -15 },
+  { tiltX: 0.05,           tiltZ: 0.03,          speed: 1.0,  phase: 0,     color: 'gold' as const },
+  { tiltX: Math.PI / 3,    tiltZ: Math.PI / 6,   speed: 0.78, phase: 2.094, color: 'blue' as const },
+  { tiltX: -Math.PI / 3,   tiltZ: -Math.PI / 6,  speed: 1.15, phase: 4.189, color: 'gold' as const },
 ]
 
 const ORBIT_R = 0.78
 const NUCLEUS_R = 0.17
 const ELECTRON_R = 0.06
 const ORBIT_PERIOD = 5.5       // seconds per full orbit
-const Y_ROT_SPEED = 0.3        // whole-atom rotation rad/s
+const Y_ROT_SPEED = 0.25       // whole-atom rotation rad/s (slightly slower for control)
 const RING_SEGMENTS = 120
-const TRAIL_LENGTH = 16         // motion blur trail (balanced)
-// ─── Noise helper (cheap deterministic wobble) ──────────────────
+const TRAIL_LENGTH = 16         // motion blur trail
+
+// ─── Noise helper (cheap deterministic wobble — toned down) ─────
 
 function noise(t: number, freq: number, amp: number): number {
   return Math.sin(t * freq) * amp +
-    Math.sin(t * freq * 1.7 + 1.3) * amp * 0.5 +
-    Math.sin(t * freq * 3.1 + 2.7) * amp * 0.2
+    Math.sin(t * freq * 1.7 + 1.3) * amp * 0.4
 }
 
 // ─── Theme-aware colors ─────────────────────────────────────────
 
 interface ColorSet {
+  // Nucleus — warm golden/orange
   nucleusCore: string
   nucleusMiddle: string
   nucleusOuter: string
-  electronBase: [number, number, number] // HSL base
-  orbit: string
-  orbitAlpha: number
+  nucleusGlowInner: string
+  nucleusGlowOuter: string
+  // Orbits — two palettes
+  goldOrbit: string
+  goldOrbitAlpha: number
+  goldElectronHSL: [number, number, number]
+  blueOrbit: string
+  blueOrbitAlpha: number
+  blueElectronHSL: [number, number, number]
+  // Shared
   highlight: string
-  glowColorBase: string
-  sparkColor: string
-  bgTint: string
+  sparkColorGold: string
+  sparkColorBlue: string
 }
 
 const DARK_COLORS: ColorSet = {
-  nucleusCore: '#93c5fd',
-  nucleusMiddle: '#3b82f6',
-  nucleusOuter: '#1d4ed8',
-  electronBase: [217, 91, 60], // HSL blue
-  orbit: '#3b82f6',
-  orbitAlpha: 0.2,
-  highlight: '#bfdbfe',
-  glowColorBase: 'rgba(59, 130, 246, 0)',
-  sparkColor: '#93c5fd',
-  bgTint: 'rgba(59, 130, 246, 0.03)',
+  nucleusCore: '#FFD580',       // bright warm gold center
+  nucleusMiddle: '#FFA030',     // vivid orange
+  nucleusOuter: '#CC6A00',      // deep amber
+  nucleusGlowInner: 'rgba(255, 180, 60, 0.35)',
+  nucleusGlowOuter: 'rgba(255, 140, 0, 0)',
+  goldOrbit: '#FFA540',
+  goldOrbitAlpha: 0.28,
+  goldElectronHSL: [35, 95, 60],  // warm gold
+  blueOrbit: '#4A9EFF',
+  blueOrbitAlpha: 0.25,
+  blueElectronHSL: [215, 90, 62], // vibrant blue
+  highlight: '#FFF4D6',
+  sparkColorGold: '#FFD080',
+  sparkColorBlue: '#7CBFFF',
 }
 
 const LIGHT_COLORS: ColorSet = {
-  nucleusCore: '#3b82f6',
-  nucleusMiddle: '#2563eb',
-  nucleusOuter: '#1e40af',
-  electronBase: [221, 83, 53],
-  orbit: '#2563eb',
-  orbitAlpha: 0.25,
-  highlight: '#60a5fa',
-  glowColorBase: 'rgba(37, 99, 235, 0)',
-  sparkColor: '#60a5fa',
-  bgTint: 'rgba(37, 99, 235, 0.02)',
+  nucleusCore: '#F5A623',
+  nucleusMiddle: '#E08800',
+  nucleusOuter: '#B36800',
+  nucleusGlowInner: 'rgba(240, 160, 40, 0.3)',
+  nucleusGlowOuter: 'rgba(200, 120, 0, 0)',
+  goldOrbit: '#D48A20',
+  goldOrbitAlpha: 0.3,
+  goldElectronHSL: [38, 88, 50],
+  blueOrbit: '#2570CC',
+  blueOrbitAlpha: 0.28,
+  blueElectronHSL: [218, 80, 50],
+  highlight: '#FFF0C0',
+  sparkColorGold: '#E8A830',
+  sparkColorBlue: '#5090DD',
 }
 
 // ─── Fallback static SVG ────────────────────────────────────────
@@ -118,14 +133,25 @@ function AtomFallback({ size, isDark }: { size: number; isDark: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AgoraFlow">
       <circle cx="20" cy="20" r="3.5" fill={c.nucleusMiddle} opacity="0.9" />
-      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.orbit} strokeWidth="0.7" fill="none" opacity="0.35" />
-      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.orbit} strokeWidth="0.7" fill="none" opacity="0.35" transform="rotate(60 20 20)" />
-      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.orbit} strokeWidth="0.7" fill="none" opacity="0.35" transform="rotate(-60 20 20)" />
-      <circle cx="36" cy="20" r="1.5" fill={c.orbit} opacity="0.85" />
-      <circle cx="12" cy="11.1" r="1.5" fill={c.orbit} opacity="0.85" />
-      <circle cx="12" cy="28.9" r="1.5" fill={c.orbit} opacity="0.85" />
+      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.goldOrbit} strokeWidth="0.7" fill="none" opacity="0.35" />
+      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.blueOrbit} strokeWidth="0.7" fill="none" opacity="0.35" transform="rotate(60 20 20)" />
+      <ellipse cx="20" cy="20" rx="16" ry="5.5" stroke={c.goldOrbit} strokeWidth="0.7" fill="none" opacity="0.35" transform="rotate(-60 20 20)" />
+      <circle cx="36" cy="20" r="1.5" fill={c.goldOrbit} opacity="0.85" />
+      <circle cx="12" cy="11.1" r="1.5" fill={c.blueOrbit} opacity="0.85" />
+      <circle cx="12" cy="28.9" r="1.5" fill={c.goldOrbit} opacity="0.85" />
     </svg>
   )
+}
+
+// ─── Nucleus sparkle particle ───────────────────────────────────
+
+interface NucleusSparkle {
+  angle: number       // angular position
+  dist: number        // distance from center (0-1 of nucleus radius)
+  speed: number       // angular speed
+  size: number        // relative size
+  phase: number       // phase offset for twinkle
+  twinkleSpeed: number
 }
 
 // ─── Spark particle system ──────────────────────────────────────
@@ -135,6 +161,7 @@ interface Spark {
   vx: number; vy: number
   life: number; maxLife: number
   size: number
+  isGold: boolean
 }
 
 // ─── Main Component ─────────────────────────────────────────────
@@ -151,13 +178,11 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
   const [canvasFailed, setCanvasFailed] = useState(false)
   const visibleRef = useRef(true)
   const hoverRef = useRef(false)
-  const hoverAmtRef = useRef(0) // smooth 0→1 interpolation
+  const hoverAmtRef = useRef(0)
 
-  // Hover handlers
   const onEnter = useCallback(() => { hoverRef.current = true }, [])
   const onLeave = useCallback(() => { hoverRef.current = false }, [])
 
-  // Visibility tracking
   useEffect(() => {
     const el = canvasRef.current
     if (!el) return
@@ -183,13 +208,27 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
     const center = size / 2
     const scale = size * 0.44
     const lineW = Math.max(0.5, size / 65)
-    const isLarge = size >= 56 // enable extra effects for larger sizes
+    const isLarge = size >= 56
 
     const colors = isDark ? DARK_COLORS : LIGHT_COLORS
 
     // Spark pool
     const sparks: Spark[] = []
-    const MAX_SPARKS = isLarge ? 18 : 8
+    const MAX_SPARKS = isLarge ? 14 : 6
+
+    // Nucleus sparkle particles (internal crystalline sparkles)
+    const nucleusSparkles: NucleusSparkle[] = []
+    const NUM_SPARKLES = isLarge ? 12 : 6
+    for (let i = 0; i < NUM_SPARKLES; i++) {
+      nucleusSparkles.push({
+        angle: Math.random() * Math.PI * 2,
+        dist: 0.2 + Math.random() * 0.75,
+        speed: (Math.random() - 0.5) * 0.8,
+        size: 0.3 + Math.random() * 0.7,
+        phase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 1.5 + Math.random() * 3,
+      })
+    }
 
     let mounted = true
     const t0 = performance.now()
@@ -220,14 +259,6 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       ctx!.globalAlpha = 1
     }
 
-    function layeredGlow(x: number, y: number, baseR: number, color1: string, color2: string, color3: string) {
-      // Three-layer bloom — toned down for premium feel
-      glow(x, y, baseR * 3.5, color1, 'rgba(0,0,0,0)', 0.03)
-      glow(x, y, baseR * 2.2, color2, 'rgba(0,0,0,0)', 0.06)
-      glow(x, y, baseR * 1.4, color3, 'rgba(0,0,0,0)', 0.10)
-    }
-
-    // Elongated trail dot (motion blur direction)
     function trailDot(x: number, y: number, r: number, angle: number, elongation: number, color: string, alpha: number) {
       ctx!.save()
       ctx!.translate(x, y)
@@ -240,12 +271,10 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       ctx!.restore()
     }
 
-    // HSL to CSS string
     function hsl(h: number, s: number, l: number, a = 1): string {
       return `hsla(${h}, ${s}%, ${l}%, ${a})`
     }
 
-    // Transform a point through orbital tilt + global rotation
     function transform(p: Vec3, tiltX: number, tiltZ: number, gRotX: number, gRotY: number): Vec3 {
       let v = rotX(p, tiltX)
       v = rotZ(v, tiltZ)
@@ -254,17 +283,15 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       return v
     }
 
-    // Emit sparks from position
-    function emitSpark(x: number, y: number, vx: number, vy: number) {
+    function emitSpark(x: number, y: number, vx: number, vy: number, isGold: boolean) {
       if (sparks.length >= MAX_SPARKS) {
-        // Recycle oldest dead spark
         const dead = sparks.findIndex(s => s.life <= 0)
         if (dead >= 0) {
-          sparks[dead] = { x, y, vx: vx + (Math.random() - 0.5) * 0.8, vy: vy + (Math.random() - 0.5) * 0.8, life: 1, maxLife: 1, size: Math.random() * 1.5 + 0.5 }
+          sparks[dead] = { x, y, vx: vx + (Math.random() - 0.5) * 0.6, vy: vy + (Math.random() - 0.5) * 0.6, life: 1, maxLife: 1, size: Math.random() * 1.2 + 0.4, isGold }
         }
         return
       }
-      sparks.push({ x, y, vx: vx + (Math.random() - 0.5) * 0.8, vy: vy + (Math.random() - 0.5) * 0.8, life: 1, maxLife: 1, size: Math.random() * 1.5 + 0.5 })
+      sparks.push({ x, y, vx: vx + (Math.random() - 0.5) * 0.6, vy: vy + (Math.random() - 0.5) * 0.6, life: 1, maxLife: 1, size: Math.random() * 1.2 + 0.4, isGold })
     }
 
     // ─ animation loop ─
@@ -284,28 +311,28 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       hoverAmtRef.current += (hTarget - hoverAmtRef.current) * 0.08
       const hAmt = hoverAmtRef.current
 
-      const gRotY = t * (Y_ROT_SPEED + hAmt * 0.15)
-      const gRotX = Math.sin(t * 0.09) * 0.12 + Math.sin(t * 0.23) * 0.04
+      const gRotY = t * (Y_ROT_SPEED + hAmt * 0.12)
+      const gRotX = Math.sin(t * 0.09) * 0.08 + Math.sin(t * 0.23) * 0.03
 
       ctx!.clearRect(0, 0, size, size)
 
-      // Collect drawables for depth sort
       type Drawable = { z: number; draw: () => void }
       const items: Drawable[] = []
 
-      // Global time-based hue shift (very subtle — stays in blue family)
-      const globalHueShift = Math.sin(t * 0.3) * 3
-
-      // ── orbital rings (wobbly, organic) ──
+      // ── orbital rings ──
       for (const orb of ORBITALS) {
+        const isGoldOrbit = orb.color === 'gold'
+        const orbitColor = isGoldOrbit ? colors.goldOrbit : colors.blueOrbit
+        const orbitAlpha = isGoldOrbit ? colors.goldOrbitAlpha : colors.blueOrbitAlpha
+
         const pts: { x: number; y: number; z3: number }[] = []
         for (let i = 0; i <= RING_SEGMENTS; i++) {
           const θ = (i / RING_SEGMENTS) * Math.PI * 2
-          // Wobble the orbit radius organically (gentle)
-          const wobble = 1 + noise(t * 0.5 + θ * 2 + orb.phase, 1.7, 0.012) + noise(t * 0.8 + θ * 3, 2.3, 0.007)
+          // Gentle wobble — controlled, not chaotic
+          const wobble = 1 + noise(t * 0.4 + θ * 2 + orb.phase, 1.5, 0.006)
           const r = ORBIT_R * wobble
           const v = transform(
-            { x: Math.cos(θ) * r, y: noise(t * 0.3 + θ * 1.5 + orb.phase, 2.0, 0.006), z: Math.sin(θ) * r },
+            { x: Math.cos(θ) * r, y: 0, z: Math.sin(θ) * r },
             orb.tiltX, orb.tiltZ, gRotX, gRotY
           )
           const p = project(v, center, scale)
@@ -323,9 +350,9 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
               ctx!.beginPath()
               ctx!.moveTo(backPts[0].x, backPts[0].y)
               for (let i = 1; i < backPts.length; i++) ctx!.lineTo(backPts[i].x, backPts[i].y)
-              ctx!.strokeStyle = colors.orbit
-              ctx!.globalAlpha = colors.orbitAlpha * 0.45
-              ctx!.lineWidth = lineW * 0.7
+              ctx!.strokeStyle = orbitColor
+              ctx!.globalAlpha = orbitAlpha * 0.35
+              ctx!.lineWidth = lineW * 0.6
               ctx!.stroke()
               ctx!.globalAlpha = 1
             }
@@ -336,24 +363,23 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
           items.push({
             z: 1,
             draw: () => {
-              // Glowing orbit lines
-              ctx!.beginPath()
-              ctx!.moveTo(frontPts[0].x, frontPts[0].y)
-              for (let i = 1; i < frontPts.length; i++) ctx!.lineTo(frontPts[i].x, frontPts[i].y)
-              // Outer glow pass
+              // Subtle glow pass for front orbits
               if (isLarge) {
-                ctx!.strokeStyle = colors.orbit
-                ctx!.globalAlpha = colors.orbitAlpha * 0.3
-                ctx!.lineWidth = lineW * 3
+                ctx!.beginPath()
+                ctx!.moveTo(frontPts[0].x, frontPts[0].y)
+                for (let i = 1; i < frontPts.length; i++) ctx!.lineTo(frontPts[i].x, frontPts[i].y)
+                ctx!.strokeStyle = orbitColor
+                ctx!.globalAlpha = orbitAlpha * 0.2
+                ctx!.lineWidth = lineW * 2.5
                 ctx!.stroke()
               }
               // Main line
               ctx!.beginPath()
               ctx!.moveTo(frontPts[0].x, frontPts[0].y)
               for (let i = 1; i < frontPts.length; i++) ctx!.lineTo(frontPts[i].x, frontPts[i].y)
-              ctx!.strokeStyle = colors.orbit
-              ctx!.globalAlpha = colors.orbitAlpha * (1 + hAmt * 0.3)
-              ctx!.lineWidth = lineW * (1 + hAmt * 0.2)
+              ctx!.strokeStyle = orbitColor
+              ctx!.globalAlpha = orbitAlpha * (1 + hAmt * 0.2)
+              ctx!.lineWidth = lineW * (1 + hAmt * 0.15)
               ctx!.stroke()
               ctx!.globalAlpha = 1
             }
@@ -364,78 +390,77 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       // ── electrons + motion blur trails ──
       for (let oi = 0; oi < ORBITALS.length; oi++) {
         const orb = ORBITALS[oi]
-        const baseSpeed = orb.speed * (1 + hAmt * 0.3)
+        const isGoldOrbit = orb.color === 'gold'
+        const eBase = isGoldOrbit ? colors.goldElectronHSL : colors.blueElectronHSL
+        const baseSpeed = orb.speed * (1 + hAmt * 0.25)
         const angle = (t / ORBIT_PERIOD) * Math.PI * 2 * baseSpeed + orb.phase
 
-        // Per-electron hue shift (subtle, stays blue)
-        const eHue = colors.electronBase[0] + orb.hueOffset + globalHueShift + Math.sin(t * 0.7 + oi * 2) * 4
-        const eSat = colors.electronBase[1]
-        const eLit = colors.electronBase[2]
+        const eHue = eBase[0] + Math.sin(t * 0.5 + oi * 2) * 3
+        const eSat = eBase[1]
+        const eLit = eBase[2]
 
-        // Compute current and previous positions for motion direction
-        const wobbleR = 1 + noise(t * 0.5 + angle * 2 + orb.phase, 1.7, 0.012)
+        // Current position
+        const wobbleR = 1 + noise(t * 0.4 + angle * 2 + orb.phase, 1.5, 0.006)
         const curV = transform(
-          { x: Math.cos(angle) * ORBIT_R * wobbleR, y: noise(t * 0.3 + angle * 1.5 + orb.phase, 2.0, 0.006), z: Math.sin(angle) * ORBIT_R * wobbleR },
+          { x: Math.cos(angle) * ORBIT_R * wobbleR, y: 0, z: Math.sin(angle) * ORBIT_R * wobbleR },
           orb.tiltX, orb.tiltZ, gRotX, gRotY
         )
         const curP = project(curV, center, scale)
 
+        // Previous position for motion direction
         const prevAngle = angle - 0.15
-        const prevWobbleR = 1 + noise(t * 0.5 + prevAngle * 2 + orb.phase, 1.7, 0.012)
+        const prevWobbleR = 1 + noise(t * 0.4 + prevAngle * 2 + orb.phase, 1.5, 0.006)
         const prevV = transform(
-          { x: Math.cos(prevAngle) * ORBIT_R * prevWobbleR, y: noise(t * 0.3 + prevAngle * 1.5 + orb.phase, 2.0, 0.006), z: Math.sin(prevAngle) * ORBIT_R * prevWobbleR },
+          { x: Math.cos(prevAngle) * ORBIT_R * prevWobbleR, y: 0, z: Math.sin(prevAngle) * ORBIT_R * prevWobbleR },
           orb.tiltX, orb.tiltZ, gRotX, gRotY
         )
         const prevP = project(prevV, center, scale)
 
-        // Motion direction for elongation
         const dx = curP.x - prevP.x
         const dy = curP.y - prevP.y
         const motionAngle = Math.atan2(dy, dx)
 
-        // Trail (elongated motion-blur dots)
-        const trailCount = isLarge ? TRAIL_LENGTH : Math.min(TRAIL_LENGTH, 14)
+        // Trail
+        const trailCount = isLarge ? TRAIL_LENGTH : Math.min(TRAIL_LENGTH, 12)
         for (let i = trailCount; i >= 1; i--) {
-          const trailAngle = angle - i * 0.055
-          const tw = 1 + noise(t * 0.5 + trailAngle * 2 + orb.phase, 1.7, 0.012)
+          const trailAngle = angle - i * 0.05
+          const tw = 1 + noise(t * 0.4 + trailAngle * 2 + orb.phase, 1.5, 0.006)
           const v = transform(
-            { x: Math.cos(trailAngle) * ORBIT_R * tw, y: noise(t * 0.3 + trailAngle * 1.5 + orb.phase, 2.0, 0.006), z: Math.sin(trailAngle) * ORBIT_R * tw },
+            { x: Math.cos(trailAngle) * ORBIT_R * tw, y: 0, z: Math.sin(trailAngle) * ORBIT_R * tw },
             orb.tiltX, orb.tiltZ, gRotX, gRotY
           )
           const p = project(v, center, scale)
 
           const progress = 1 - i / (trailCount + 1)
-          const trailR = ELECTRON_R * scale * p.s * progress * 0.65
-          // Trail fades from electron color to transparent, with elongation
-          const trailAlpha = progress * progress * 0.22
-          const elongation = 1.3 + (1 - progress) * 0.8 // subtle elongation further back
-          const trailHue = eHue + i * 0.3 // very slight hue shift along trail
-          const trailLit = eLit + (1 - progress) * 15
+          const trailR = ELECTRON_R * scale * p.s * progress * 0.6
+          const trailAlpha = progress * progress * 0.2
+          const elongation = 1.2 + (1 - progress) * 0.6
+          const trailLit = eLit + (1 - progress) * 12
 
           items.push({
             z: v.z,
             draw: () => {
-              trailDot(p.x, p.y, trailR, motionAngle, elongation, hsl(trailHue, eSat, trailLit), trailAlpha)
+              trailDot(p.x, p.y, trailR, motionAngle, elongation, hsl(eHue, eSat, trailLit), trailAlpha)
             }
           })
         }
 
         // Electron body
-        const eR = ELECTRON_R * scale * curP.s * (1 + hAmt * 0.15)
+        const eR = ELECTRON_R * scale * curP.s * (1 + hAmt * 0.12)
         const eColor = hsl(eHue, eSat, eLit)
-        const eGlow = hsl(eHue, eSat, eLit + 15, 0.4)
-        const eBright = hsl(eHue, eSat - 10, eLit + 30)
+        const eBright = hsl(eHue, eSat - 10, eLit + 25)
 
         items.push({
           z: curV.z,
           draw: () => {
-            // Multi-layer glow
+            // Outer glow
             if (isLarge) {
-              layeredGlow(curP.x, curP.y, eR, hsl(eHue, eSat, eLit + 10, 0.08), hsl(eHue, eSat, eLit, 0.15), eGlow)
+              glow(curP.x, curP.y, eR * 3, hsl(eHue, eSat, eLit + 10, 0.12), 'rgba(0,0,0,0)', 0.15)
+              glow(curP.x, curP.y, eR * 2, hsl(eHue, eSat, eLit, 0.2), 'rgba(0,0,0,0)', 0.2)
             } else {
-              glow(curP.x, curP.y, eR * 3, eGlow, 'rgba(0,0,0,0)', 0.5)
+              glow(curP.x, curP.y, eR * 2.5, hsl(eHue, eSat, eLit, 0.3), 'rgba(0,0,0,0)', 0.3)
             }
-            // Core with subtle inner gradient
+            // Core gradient
             const cg = ctx!.createRadialGradient(curP.x - eR * 0.2, curP.y - eR * 0.2, 0, curP.x, curP.y, eR)
             cg.addColorStop(0, eBright)
             cg.addColorStop(0.6, eColor)
@@ -448,16 +473,16 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
             ctx!.globalAlpha = 1
             // Specular highlight
             if (eR > 1.2) {
-              circle(curP.x - eR * 0.25, curP.y - eR * 0.25, eR * 0.3, colors.highlight, 0.5)
+              circle(curP.x - eR * 0.25, curP.y - eR * 0.25, eR * 0.28, colors.highlight, 0.45)
             }
           }
         })
 
-        // Emit sparks from electron (only for larger sizes, reduced frequency)
-        if (isLarge && Math.random() < 0.075) {
-          const sparkVx = (curP.x - prevP.x) * 0.3 + (Math.random() - 0.5) * 1.5
-          const sparkVy = (curP.y - prevP.y) * 0.3 + (Math.random() - 0.5) * 1.5
-          emitSpark(curP.x, curP.y, sparkVx, sparkVy)
+        // Sparse sparks from electrons
+        if (isLarge && Math.random() < 0.05) {
+          const sparkVx = (curP.x - prevP.x) * 0.25 + (Math.random() - 0.5) * 1.2
+          const sparkVy = (curP.y - prevP.y) * 0.25 + (Math.random() - 0.5) * 1.2
+          emitSpark(curP.x, curP.y, sparkVx, sparkVy, isGoldOrbit)
         }
       }
 
@@ -465,34 +490,30 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       {
         const p = project({ x: 0, y: 0, z: 0 }, center, scale)
         const nR = NUCLEUS_R * scale * p.s
-        // Breathing: compound sinusoids for organic feel
-        const breath = 1 + Math.sin(t * 1.2) * 0.06 + Math.sin(t * 2.7) * 0.02 + Math.sin(t * 0.5) * 0.03
-        const hoverExpand = 1 + hAmt * 0.25
+        // Controlled breathing
+        const breath = 1 + Math.sin(t * 1.0) * 0.04 + Math.sin(t * 2.3) * 0.015
+        const hoverExpand = 1 + hAmt * 0.2
         const pulse = breath * hoverExpand
-
-        const nucHue = colors.electronBase[0] + globalHueShift
-        const nucPulseAlpha = 0.08 + Math.sin(t * 1.5) * 0.03 + hAmt * 0.06
 
         items.push({
           z: 0,
           draw: () => {
-            // Outer bloom (ambient energy — restrained)
+            // Warm ambient glow (controlled, premium)
             if (isLarge) {
-              glow(p.x, p.y, nR * 4 * pulse, hsl(nucHue, 80, 60, 0.04), 'rgba(0,0,0,0)', nucPulseAlpha * 0.7)
-              glow(p.x, p.y, nR * 2.8 * pulse, hsl(nucHue, 85, 55, 0.07), 'rgba(0,0,0,0)', nucPulseAlpha)
+              glow(p.x, p.y, nR * 4.5 * pulse, 'rgba(255, 170, 40, 0.06)', 'rgba(255, 140, 0, 0)', 0.08 + hAmt * 0.04)
+              glow(p.x, p.y, nR * 3.0 * pulse, 'rgba(255, 180, 60, 0.1)', 'rgba(255, 140, 0, 0)', 0.12 + hAmt * 0.05)
             }
-            // Mid glow
-            glow(p.x, p.y, nR * 2.2 * pulse, colors.nucleusMiddle, colors.glowColorBase, 0.14 + hAmt * 0.08)
-            // Inner glow
-            glow(p.x, p.y, nR * 1.5 * pulse, colors.nucleusCore, colors.glowColorBase, 0.28 + hAmt * 0.08)
+            // Inner golden glow
+            glow(p.x, p.y, nR * 2.0 * pulse, colors.nucleusGlowInner, colors.nucleusGlowOuter, 0.22 + hAmt * 0.06)
+            glow(p.x, p.y, nR * 1.4 * pulse, colors.nucleusCore, 'rgba(255,200,80,0)', 0.3 + hAmt * 0.08)
 
-            // Core body with gradient
+            // Core body with warm gradient
             const ng = ctx!.createRadialGradient(
-              p.x - nR * 0.15, p.y - nR * 0.15, 0,
+              p.x - nR * 0.12, p.y - nR * 0.12, 0,
               p.x, p.y, nR * pulse
             )
             ng.addColorStop(0, colors.nucleusCore)
-            ng.addColorStop(0.5, colors.nucleusMiddle)
+            ng.addColorStop(0.45, colors.nucleusMiddle)
             ng.addColorStop(1, colors.nucleusOuter)
             ctx!.beginPath()
             ctx!.arc(p.x, p.y, nR * pulse, 0, Math.PI * 2)
@@ -501,17 +522,37 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
             ctx!.fill()
             ctx!.globalAlpha = 1
 
-            // Bright specular highlight
+            // Internal sparkle particles (crystalline effect like the reference)
             if (nR > 2) {
-              const hlR = nR * 0.25 * pulse
+              for (const sp of nucleusSparkles) {
+                const spAngle = sp.angle + t * sp.speed
+                const spDist = sp.dist * nR * pulse * 0.85
+                const spX = p.x + Math.cos(spAngle) * spDist
+                const spY = p.y + Math.sin(spAngle) * spDist
+                // Twinkle effect
+                const twinkle = Math.max(0, Math.sin(t * sp.twinkleSpeed + sp.phase))
+                const spAlpha = twinkle * twinkle * 0.7
+                const spSize = sp.size * (nR * 0.12) * (0.5 + twinkle * 0.5)
+                if (spAlpha > 0.05) {
+                  // Sparkle glow
+                  glow(spX, spY, spSize * 2.5, 'rgba(255, 255, 230, 0.4)', 'rgba(255, 255, 200, 0)', spAlpha * 0.4)
+                  // Sparkle core
+                  circle(spX, spY, Math.max(spSize, 0.3), '#FFFDE8', spAlpha)
+                }
+              }
+            }
+
+            // Bright specular highlight on nucleus
+            if (nR > 2) {
+              const hlR = nR * 0.22 * pulse
               const hlG = ctx!.createRadialGradient(
-                p.x - nR * 0.2, p.y - nR * 0.25, 0,
-                p.x - nR * 0.2, p.y - nR * 0.25, hlR
+                p.x - nR * 0.18, p.y - nR * 0.22, 0,
+                p.x - nR * 0.18, p.y - nR * 0.22, hlR
               )
-              hlG.addColorStop(0, 'rgba(255,255,255,0.6)')
+              hlG.addColorStop(0, 'rgba(255,255,255,0.55)')
               hlG.addColorStop(1, 'rgba(255,255,255,0)')
               ctx!.beginPath()
-              ctx!.arc(p.x - nR * 0.2, p.y - nR * 0.25, hlR, 0, Math.PI * 2)
+              ctx!.arc(p.x - nR * 0.18, p.y - nR * 0.22, hlR, 0, Math.PI * 2)
               ctx!.fillStyle = hlG
               ctx!.fill()
             }
@@ -525,17 +566,18 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
           const s = sparks[i]
           s.x += s.vx * dt * 60
           s.y += s.vy * dt * 60
-          s.life -= dt * 2.5
+          s.life -= dt * 2.2
           if (s.life <= 0) {
             sparks.splice(i, 1)
             continue
           }
-          const alpha = s.life * s.life * 0.5
-          const sparkHue = colors.electronBase[0] + globalHueShift + (1 - s.life) * 10
+          const alpha = s.life * s.life * 0.45
+          const sparkHue = s.isGold ? 38 + (1 - s.life) * 8 : 215 + (1 - s.life) * 8
+          const sparkSat = s.isGold ? 92 : 85
           items.push({
             z: 0.5,
             draw: () => {
-              circle(s.x, s.y, s.size * s.life, hsl(sparkHue, 90, 75), alpha)
+              circle(s.x, s.y, s.size * s.life, hsl(sparkHue, sparkSat, 72), alpha)
             }
           })
         }
