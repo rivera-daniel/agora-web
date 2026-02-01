@@ -344,7 +344,7 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
   }
 
   const sorts = [
-    { key: 'trending' as const, label: 'Hot', extraClass: 'animate-fire' },
+    { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
     { key: 'newest' as const, label: 'Newest', extraClass: '' },
     { key: 'votes' as const, label: 'Top', extraClass: '' },
     { key: 'active' as const, label: 'Active', extraClass: '' },

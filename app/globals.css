@@ -222,20 +222,85 @@ html {
   color: var(--text-primary);
 }
 
-/* Fire glow animation for "Hot" label */
+/* Fire animation for "Hot" label — multi-layer glow + color cycling + flicker */
+
+/* Layer 1: Color cycling through fire spectrum */
+@keyframes fire-color {
+  0%   { color: #f97316; }          /* orange */
+  15%  { color: #fb923c; }          /* light orange */
+  30%  { color: #fbbf24; }          /* amber/yellow */
+  45%  { color: #f59e0b; }          /* warm amber */
+  60%  { color: #ef4444; }          /* red flare */
+  75%  { color: #f97316; }          /* back to orange */
+  90%  { color: #fbbf24; }          /* yellow flash */
+  100% { color: #f97316; }          /* orange */
+}
+
+/* Layer 2: Multi-depth glow that breathes */
 @keyframes fire-glow {
   0%, 100% {
-    text-shadow: 0 0 4px rgba(251, 146, 60, 0.6), 0 0 8px rgba(251, 146, 60, 0.3);
-    color: #f97316;
+    text-shadow:
+      0 0 4px rgba(251, 146, 60, 0.8),
+      0 0 8px rgba(251, 146, 60, 0.5),
+      0 0 16px rgba(239, 68, 68, 0.3),
+      0 0 32px rgba(239, 68, 68, 0.1);
+  }
+  25% {
+    text-shadow:
+      0 0 6px rgba(251, 191, 36, 0.9),
+      0 0 12px rgba(249, 115, 22, 0.6),
+      0 0 24px rgba(251, 146, 60, 0.4),
+      0 0 48px rgba(239, 68, 68, 0.15);
   }
   50% {
-    text-shadow: 0 0 8px rgba(251, 146, 60, 0.9), 0 0 16px rgba(251, 146, 60, 0.5);
-    color: #fb923c;
+    text-shadow:
+      0 0 8px rgba(239, 68, 68, 0.9),
+      0 0 16px rgba(249, 115, 22, 0.7),
+      0 0 32px rgba(251, 191, 36, 0.4),
+      0 0 56px rgba(251, 146, 60, 0.2);
+  }
+  75% {
+    text-shadow:
+      0 0 5px rgba(249, 115, 22, 0.85),
+      0 0 10px rgba(251, 191, 36, 0.55),
+      0 0 20px rgba(239, 68, 68, 0.35),
+      0 0 40px rgba(251, 146, 60, 0.12);
   }
 }
 
+/* Layer 3: Irregular flicker — long cycle with uneven keyframes to feel random */
+@keyframes fire-flicker {
+  0%   { opacity: 1;    transform: scale(1); }
+  4%   { opacity: 0.88; transform: scale(0.98); }
+  8%   { opacity: 1;    transform: scale(1.01); }
+  12%  { opacity: 0.92; transform: scale(0.99); }
+  20%  { opacity: 1;    transform: scale(1); }
+  23%  { opacity: 0.85; transform: scale(0.97); }
+  26%  { opacity: 1;    transform: scale(1.02); }
+  35%  { opacity: 0.95; transform: scale(1); }
+  40%  { opacity: 1;    transform: scale(1.01); }
+  44%  { opacity: 0.87; transform: scale(0.98); }
+  48%  { opacity: 1;    transform: scale(1); }
+  55%  { opacity: 0.9;  transform: scale(0.99); }
+  58%  { opacity: 1;    transform: scale(1.02); }
+  65%  { opacity: 0.93; transform: scale(1); }
+  70%  { opacity: 1;    transform: scale(0.98); }
+  73%  { opacity: 0.86; transform: scale(1.01); }
+  78%  { opacity: 1;    transform: scale(1); }
+  82%  { opacity: 0.91; transform: scale(0.99); }
+  88%  { opacity: 1;    transform: scale(1.01); }
+  92%  { opacity: 0.88; transform: scale(0.98); }
+  96%  { opacity: 1;    transform: scale(1); }
+  100% { opacity: 1;    transform: scale(1); }
+}
+
 .animate-fire {
-  animation: fire-glow 1.5s ease-in-out infinite;
+  animation:
+    fire-color 3s ease-in-out infinite,
+    fire-glow 2s ease-in-out infinite,
+    fire-flicker 4s linear infinite;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 /* Transition for theme changes */
