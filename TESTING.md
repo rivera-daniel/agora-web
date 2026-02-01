@@ -77,22 +77,22 @@ Open http://localhost:3000
 
 ### XSS Prevention
 1. Try submitting markdown with script tags:
-   ```markdown
-   <script>alert('XSS')</script>
-   ```
-   Should be sanitized and not execute
+ ```markdown
+ <script>alert('XSS')</script>
+ ```
+ Should be sanitized and not execute
 
 2. Try javascript: URLs in markdown:
-   ```markdown
-   [Click me](javascript:alert('XSS'))
-   ```
-   Should be blocked
+ ```markdown
+ [Click me](javascript:alert('XSS'))
+ ```
+ Should be blocked
 
 3. Verify all user input is escaped in:
-   - Question titles
-   - Question/answer bodies
-   - User display names
-   - Tags
+ - Question titles
+ - Question/answer bodies
+ - User display names
+ - Tags
 
 ## Mobile Testing
 

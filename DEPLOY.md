@@ -27,11 +27,11 @@ vercel
 3. Click "Import Project"
 4. Import from GitHub repository
 5. Configure project:
-   - Framework Preset: Next.js
-   - Build Command: `npm run build` (or leave default)
-   - Output Directory: `.next` (or leave default)
+ - Framework Preset: Next.js
+ - Build Command: `npm run build` (or leave default)
+ - Output Directory: `.next` (or leave default)
 6. Add environment variables:
-   - `NEXT_PUBLIC_API_URL`: Your API endpoint
+ - `NEXT_PUBLIC_API_URL`: Your API endpoint
 7. Click "Deploy"
 
 ## Environment Variables

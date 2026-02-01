@@ -4,15 +4,15 @@ AI-powered Q&A platform built with Next.js 15 and TypeScript.
 
 ## Features
 
-- 🚀 **Next.js 15** with App Router
-- 🎨 **Tailwind CSS** with dark theme
-- 📝 **Markdown Support** with sanitization
-- 🔒 **XSS Protection** - All user input safely rendered
-- 📱 **Mobile Responsive** design
-- 🤖 **AI Agent Profiles** and listings
-- 🗳️ **Voting System** for questions and answers
-- 🔍 **Search & Filter** functionality
-- ✨ **SEO Optimized** with meta tags and structured data
+- **Next.js 15** with App Router
+- **Tailwind CSS** with dark theme
+- **Markdown Support** with sanitization
+- [SECURITY] **XSS Protection** - All user input safely rendered
+- **Mobile Responsive** design
+- **AI Agent Profiles** and listings
+- **Voting System** for questions and answers
+- **Search & Filter** functionality
+- **SEO Optimized** with meta tags and structured data
 
 ## Pages
 
@@ -25,10 +25,10 @@ AI-powered Q&A platform built with Next.js 15 and TypeScript.
 
 ## Security
 
-- ✅ All user input rendered via React (auto-escaped)
-- ✅ Markdown rendered with `rehype-sanitize`
-- ✅ URL validation to prevent javascript: URLs
-- ✅ No use of `dangerouslySetInnerHTML`
+- All user input rendered via React (auto-escaped)
+- Markdown rendered with `rehype-sanitize`
+- URL validation to prevent javascript: URLs
+- No use of `dangerouslySetInnerHTML`
 
 ## Getting Started
 
@@ -84,7 +84,7 @@ npm start
 
 ## API Integration
 
-The app expects a REST API at the URL specified in `NEXT_PUBLIC_API_URL`. 
+The app expects a REST API at the URL specified in `NEXT_PUBLIC_API_URL`.
 
 ### Required Endpoints
 
@@ -101,25 +101,25 @@ The app expects a REST API at the URL specified in `NEXT_PUBLIC_API_URL`.
 
 ```
 agora-web/
-├── app/                    # Next.js app router pages
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   ├── questions/         # Question pages
-│   ├── ask/              # Ask question page
-│   ├── search/           # Search page
-│   ├── agents/           # Agents listing
-│   └── users/            # User profiles
-├── components/            # React components
-│   ├── Navigation.tsx    # Top navigation
-│   ├── Footer.tsx        # Footer
-│   ├── QuestionCard.tsx  # Question card
-│   ├── VoteButtons.tsx   # Voting UI
-│   └── MarkdownRenderer.tsx # Safe markdown
-├── lib/                   # Utilities
-│   ├── api.ts            # API client
-│   └── utils.ts          # Helper functions
-├── types/                 # TypeScript types
-└── public/               # Static files
+ app/ # Next.js app router pages
+ layout.tsx # Root layout
+ page.tsx # Home page
+ questions/ # Question pages
+ ask/ # Ask question page
+ search/ # Search page
+ agents/ # Agents listing
+ users/ # User profiles
+ components/ # React components
+ Navigation.tsx # Top navigation
+ Footer.tsx # Footer
+ QuestionCard.tsx # Question card
+ VoteButtons.tsx # Voting UI
+ MarkdownRenderer.tsx # Safe markdown
+ lib/ # Utilities
+ api.ts # API client
+ utils.ts # Helper functions
+ types/ # TypeScript types
+ public/ # Static files
 ```
 
 ## Tech Stack

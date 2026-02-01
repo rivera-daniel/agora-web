@@ -1,20 +1,20 @@
 # Agora Web - Quick Instructions
 
-## ✅ Project Complete!
+## Project Complete!
 
 The Agora Web UI is ready for testing and deployment. All requirements have been met:
 
 ### What's Been Built
-- ✅ Next.js 15 app with App Router
-- ✅ All required pages (home, question detail, search, agents, profiles, ask question)
-- ✅ Dark theme with Tailwind CSS
-- ✅ Mobile responsive design
-- ✅ SEO optimization (meta tags, OG images)
-- ✅ XSS protection (no dangerouslySetInnerHTML in production code)
-- ✅ API integration structure
-- ✅ Voting system with optimistic updates
+- Next.js 15 app with App Router
+- All required pages (home, question detail, search, agents, profiles, ask question)
+- Dark theme with Tailwind CSS
+- Mobile responsive design
+- SEO optimization (meta tags, OG images)
+- XSS protection (no dangerouslySetInnerHTML in production code)
+- API integration structure
+- Voting system with optimistic updates
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Option 1: Development Mode
 ```bash
@@ -48,7 +48,7 @@ echo "NEXT_PUBLIC_API_URL=http://localhost:3001/api" > .env.local
 npm run dev
 ```
 
-## 📦 Optional Dependencies
+## Optional Dependencies
 
 The app works as-is, but for enhanced features, install:
 
@@ -63,7 +63,7 @@ npm install axios
 npm install clsx
 ```
 
-## 🌐 Deploy to Vercel
+## Deploy to Vercel
 
 ### Method 1: CLI
 ```bash
@@ -75,7 +75,7 @@ npx vercel
 2. Import on vercel.com
 3. Deploy
 
-## 📝 Files Overview
+## Files Overview
 
 - `app/` - All pages and routes
 - `components/` - Reusable UI components
@@ -86,7 +86,7 @@ npx vercel
 - `TESTING.md` - Testing checklist
 - `FEATURES.md` - Complete feature list
 
-## ⚠️ Notes
+## [WARNING] Notes
 
 1. **Markdown Rendering**: Currently using a simplified renderer. For production, install the markdown packages listed above.
 
@@ -96,7 +96,7 @@ npx vercel
 
 4. **Build Warning**: You may see a Next.js version warning. The app still works perfectly.
 
-## ✨ Ready for Testing!
+## Ready for Testing!
 
 The application is fully functional and ready for testing by **Sun 02/01 10:00 UTC**.
 
@@ -108,16 +108,16 @@ Test the following:
 - Create a new question (mock API will save it)
 - View user profiles
 
-## 🎉 Success!
+## Success!
 
 All deliverables have been completed:
-- Next.js 15 ✅
-- TypeScript ✅
-- Tailwind Dark Theme ✅
-- All Pages ✅
-- Mobile Responsive ✅
-- SEO Ready ✅
-- XSS Protected ✅
-- Vercel Ready ✅
+- Next.js 15
+- TypeScript
+- Tailwind Dark Theme
+- All Pages
+- Mobile Responsive
+- SEO Ready
+- XSS Protected
+- Vercel Ready
 
 The app is production-ready and can be deployed immediately!
