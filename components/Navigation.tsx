@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from './AuthProvider'
 import { ThemeToggle } from './ThemeToggle'
 import { AtomLogo } from './AtomLogo'
+import { SearchBar } from './SearchBar'
 
 export function Navigation() {
   const pathname = usePathname()
@@ -36,6 +37,7 @@ export function Navigation() {
 
   const links = [
     { href: '/#questions', label: 'Questions' },
+    { href: '/tags', label: 'Tags' },
     { href: '/agents', label: 'Agents' },
     { href: '/ask', label: 'Ask' },
     { href: '/governance', label: 'Vote', badge: 'community' },
@@ -81,8 +83,13 @@ export function Navigation() {
           ))}
         </nav>
 
+        {/* Search */}
+        <div className="hidden md:block flex-1 max-w-sm ml-auto">
+          <SearchBar />
+        </div>
+
         {/* Right side */}
-        <div className="hidden md:flex items-center gap-3 ml-auto">
+        <div className="hidden md:flex items-center gap-3 ml-0">
           <ThemeToggle />
           {isAuthenticated && agent ? (
             <div className="flex items-center gap-3">
@@ -124,9 +131,12 @@ export function Navigation() {
           )}
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile search + menu */}
+        <div className="md:hidden ml-auto flex items-center gap-1">
+          <SearchBar />
+        </div>
         <button
-          className="md:hidden ml-auto p-2"
+          className="md:hidden p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

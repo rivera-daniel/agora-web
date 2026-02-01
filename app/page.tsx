@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Question } from '@/types'
 import { QuestionCard } from '@/components/QuestionCard'
+import { TagFilterBar } from '@/components/TagFilterBar'
 import { questionApi } from '@/lib/api'
 import { useAuth } from '@/components/AuthProvider'
 import { Suspense } from 'react'
@@ -72,13 +73,18 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
+  const [selectedTags, setSelectedTags] = useState<string[]>(tagFilter ? [tagFilter] : [])
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Combine URL tag filter with selected tags
+  const activeTags = tagFilter ? [tagFilter] : selectedTags
 
   useEffect(() => {
     setPage(1)
     setQuestions([])
     load(1)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, tagFilter])
+  }, [sortBy, selectedTags, tagFilter])
 
   const load = async (p: number) => {
     try {
@@ -87,10 +93,15 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
         sortBy,
         page: p,
         pageSize: 20,
-        tags: tagFilter ? [tagFilter] : undefined,
+        tags: activeTags.length > 0 ? activeTags : undefined,
       })
-      if (p === 1) setQuestions(res.data)
-      else setQuestions((prev) => [...prev, ...res.data])
+      let data = res.data
+      // Client-side "unanswered" filter (backend may not support it natively)
+      if (sortBy === 'active') {
+        // 'active' tab already exists — we'll use it as-is
+      }
+      if (p === 1) setQuestions(data)
+      else setQuestions((prev) => [...prev, ...data])
       setHasMore(res.hasMore)
       setTotal(res.total)
     } catch (err) {
@@ -118,10 +129,12 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {tagFilter ? (
+              {activeTags.length > 0 ? (
                 <>
                   Questions tagged{' '}
-                  <span className="tag text-sm ml-1">{tagFilter}</span>
+                  {activeTags.map(t => (
+                    <span key={t} className="tag text-sm ml-1">{t}</span>
+                  ))}
                 </>
               ) : (
                 'All Questions'
@@ -131,10 +144,37 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
               {total} questions
             </p>
           </div>
-          <Link href="/ask" className="btn-primary text-sm">
-            Ask Question
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary text-sm flex items-center gap-1.5 ${showFilters ? 'ring-1' : ''}`}
+              style={showFilters ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : {}}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filter
+              {selectedTags.length > 0 && (
+                <span className="bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {selectedTags.length}
+                </span>
+              )}
+            </button>
+            <Link href="/ask" className="btn-primary text-sm">
+              Ask Question
+            </Link>
+          </div>
         </div>
+
+        {/* Tag filter panel */}
+        {showFilters && !tagFilter && (
+          <div
+            className="mb-4 p-4 rounded-lg border"
+            style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
+          >
+            <TagFilterBar selectedTags={selectedTags} onTagsChange={setSelectedTags} />
+          </div>
+        )}
 
         {/* Sort tabs */}
         <div
@@ -155,13 +195,14 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
               {s.label}
             </button>
           ))}
-          {tagFilter && (
+          {(tagFilter || selectedTags.length > 0) && (
             <Link
               href="/"
+              onClick={() => setSelectedTags([])}
               className="ml-auto text-xs px-2 py-1 rounded hover:bg-[var(--bg-tertiary)] transition-colors"
               style={{ color: 'var(--text-tertiary)' }}
             >
-              Clear filter ✕
+              Clear filters ✕
             </Link>
           )}
         </div>
