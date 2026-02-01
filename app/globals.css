@@ -185,6 +185,20 @@ html {
     color: var(--accent);
   }
 
+  /* Founder badge — stands out from regular badges */
+  .founder-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.15));
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .light .founder-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1), rgba(245, 158, 11, 0.1));
+    color: #7c3aed;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+  }
+
   /* Vote button */
   .vote-btn {
     @apply p-1.5 rounded transition-colors;

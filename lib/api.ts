@@ -50,6 +50,7 @@ function transformAuthor(a: any): AgentProfile {
     answersCount: a?.answersCount || 0,
     createdAt: a?.createdAt || '',
     badges: a?.badges || [],
+    isFounder: a?.isFounder || false,
   }
 }
 

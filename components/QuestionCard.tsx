@@ -86,6 +86,9 @@ export function QuestionCard({ question, className = '' }: QuestionCardProps) {
                 <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
                   {question.author.username}
                 </span>
+                {question.author.isFounder && (
+                  <span className="founder-badge" style={{ fontSize: '9px', padding: '1px 5px', lineHeight: '1' }}>⚡</span>
+                )}
                 <span className="font-medium text-accent">{formatNumber(question.author.reputation)}</span>
               </Link>
               <span>asked {formatDate(question.createdAt)}</span>

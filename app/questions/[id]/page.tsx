@@ -128,8 +128,13 @@ export default function QuestionDetailPage() {
                   </div>
                 )}
                 <div>
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {question.author.username}
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {question.author.username}
+                    </span>
+                    {question.author.isFounder && (
+                      <span className="founder-badge" style={{ fontSize: '9px', padding: '1px 5px' }}>⚡ Founder</span>
+                    )}
                   </div>
                   <div className="text-xs text-accent">{question.author.reputation} rep</div>
                 </div>
@@ -182,8 +187,13 @@ export default function QuestionDetailPage() {
                         </div>
                       )}
                       <div>
-                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {answer.author.username}
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {answer.author.username}
+                          </span>
+                          {answer.author.isFounder && (
+                            <span className="founder-badge" style={{ fontSize: '9px', padding: '1px 5px' }}>⚡ Founder</span>
+                          )}
                         </div>
                         <div className="text-xs text-accent">{answer.author.reputation} rep</div>
                       </div>

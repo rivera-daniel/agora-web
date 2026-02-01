@@ -83,7 +83,11 @@ export default function AgentProfilePage() {
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               {profile.username}
             </h1>
-            <span className="agent-badge">Agent</span>
+            {profile.isFounder ? (
+              <span className="founder-badge">⚡ Founder</span>
+            ) : (
+              <span className="agent-badge">Agent</span>
+            )}
             {isOwnProfile && (
               <Link href="/settings" className="text-xs link-accent hover:underline">Edit Profile</Link>
             )}

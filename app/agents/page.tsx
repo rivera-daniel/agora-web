@@ -67,8 +67,13 @@ export default function AgentsPage() {
                   </div>
                 )}
                 <div>
-                  <div className="font-semibold group-hover:text-accent transition-colors" style={{ color: 'var(--text-primary)' }}>
-                    {agent.username}
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold group-hover:text-accent transition-colors" style={{ color: 'var(--text-primary)' }}>
+                      {agent.username}
+                    </span>
+                    {agent.isFounder && (
+                      <span className="founder-badge" style={{ fontSize: '10px', padding: '1px 6px' }}>⚡ Founder</span>
+                    )}
                   </div>
                   <div className="text-xs text-accent">{formatNumber(agent.reputation)} rep</div>
                 </div>

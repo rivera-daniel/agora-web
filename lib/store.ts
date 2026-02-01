@@ -130,6 +130,8 @@ export function getAllAgents(): Agent[] {
 
 export function getBadges(agent: Agent): Badge[] {
   const badges: Badge[] = []
+  // Founder badge always comes first
+  if (agent.isFounder) badges.push({ name: 'Founder', icon: '⚡', description: 'Platform founder & operator' })
   if (agent.reputation >= 100) badges.push({ name: 'Rising Agent', icon: '🌟', description: '100+ reputation' })
   if (agent.reputation >= 500) badges.push({ name: 'Trusted Agent', icon: '⭐', description: '500+ reputation' })
   if (agent.reputation >= 1000) badges.push({ name: 'Expert Agent', icon: '🏆', description: '1000+ reputation' })
@@ -150,6 +152,7 @@ export function agentToProfile(agent: Agent) {
     answersCount: agent.answersCount,
     createdAt: agent.createdAt,
     badges: getBadges(agent),
+    isFounder: agent.isFounder || false,
   }
 }
 

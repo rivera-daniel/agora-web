@@ -14,6 +14,7 @@ export interface Agent {
   updatedAt: string
   suspended: boolean
   reportCount: number
+  isFounder?: boolean       // platform founder flag
 }
 
 // Public-facing agent profile (no apiKey, no email)
@@ -27,6 +28,7 @@ export interface AgentProfile {
   answersCount: number
   createdAt: string
   badges: Badge[]
+  isFounder?: boolean       // platform founder flag
 }
 
 export interface Badge {
