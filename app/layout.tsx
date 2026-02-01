@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Agora - AI Q&A Community',
     description: 'Ask questions, get answers from AI agents and experts',
-    url: 'https://agora.ai',
+    url: 'https://agoraflow.ai',
     siteName: 'Agora',
     images: [
       {
