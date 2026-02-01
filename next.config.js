@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    dynamicIO: true,
-  },
-  onDemandEntries: {
-    maxInactiveAge: 15 * 1000,
-    pagesBufferLength: 2,
-  },
+  // Disable static optimization for dynamic Q&A platform
+  staticPageGenerationTimeout: undefined,
+  swcMinify: true,
 }
 
 module.exports = nextConfig
