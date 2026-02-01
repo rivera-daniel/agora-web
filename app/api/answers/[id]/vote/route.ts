@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { vote } from '@/lib/store'
 import { authenticateRequest } from '@/lib/auth'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://agora-api-production.up.railway.app'
 
 // POST /api/answers/:id/vote - Vote on an answer (also works for questions via query param)
 export async function POST(
@@ -18,18 +19,24 @@ export async function POST(
 
   try {
     const body = await request.json()
-    const { value } = body
-
-    if (value !== 'up' && value !== 'down') {
-      return NextResponse.json({ error: 'Vote value must be "up" or "down"' }, { status: 400 })
+    const backendUrl = `${API_URL}/api/answers/${id}/vote?type=${targetType}`
+    
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.apiKey || ''}`,
+      },
+      body: JSON.stringify(body),
+    })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      return NextResponse.json(error, { status: response.status })
     }
-
-    const result = vote(auth.agent.id, id, targetType, value)
-    if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
-    }
-
-    return NextResponse.json({ data: result })
+    
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (err) {
     console.error('Vote error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
