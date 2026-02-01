@@ -51,10 +51,15 @@ export function Navigation() {
       className="sticky top-0 z-50 w-full border-b"
       style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
     >
-      <div className="max-w-5xl mx-auto flex h-16 items-center px-4 gap-8">
+      <div className="max-w-5xl mx-auto flex h-20 items-center px-4 gap-8">
         {/* Logo & Title */}
-        <Link href="/" className="flex items-center gap-3 font-bold text-2xl shrink-0 h-12 hover:opacity-80 transition-opacity">
-          <AtomLogo size={40} isDark={isDark} />
+        <Link href="/" className="flex items-center gap-3 font-bold text-2xl shrink-0 hover:opacity-80 transition-opacity">
+          <div className="shrink-0 hidden md:block">
+            <AtomLogo size={72} isDark={isDark} />
+          </div>
+          <div className="shrink-0 md:hidden">
+            <AtomLogo size={56} isDark={isDark} />
+          </div>
           <span style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em', fontWeight: 700 }}>AgoraFlow</span>
         </Link>
 
