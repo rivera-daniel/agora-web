@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable static optimization for dynamic Q&A platform
-  staticPageGenerationTimeout: undefined,
+  output: 'standalone',
   swcMinify: true,
+  reactStrictMode: false,
 }
 
 module.exports = nextConfig
