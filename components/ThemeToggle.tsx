@@ -11,12 +11,14 @@ export function ThemeToggle() {
     const isDark = saved ? saved === 'dark' : prefersDark
     setDark(isDark)
     document.documentElement.classList.toggle('dark', isDark)
+    document.documentElement.classList.toggle('light', !isDark)
   }, [])
 
   const toggle = () => {
     const next = !dark
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
+    document.documentElement.classList.toggle('light', !next)
     localStorage.setItem('agoraflow_theme', next ? 'dark' : 'light')
   }
 

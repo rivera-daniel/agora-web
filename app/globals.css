@@ -2,27 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Accent utilities */
+@layer utilities {
+  .text-accent {
+    color: var(--accent);
+  }
+  .bg-accent {
+    background-color: var(--accent);
+  }
+  .hover\:text-accent:hover {
+    color: var(--accent);
+  }
+}
+
 /* === AgoraFlow Theme System === */
 
 :root {
-  /* Light mode (default) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #f0f1f3;
-  --text-primary: #1a1a2e;
-  --text-secondary: #4a5568;
-  --text-tertiary: #718096;
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e0;
-  --tag-bg: #edf2f7;
-  --tag-text: #2d3748;
-  --code-bg: #f1f5f9;
-  --hover-bg: #f7fafc;
-  --accent-subtle: #eff6ff;
-  --shadow-color: rgba(0, 0, 0, 0.06);
-}
-
-.dark {
+  /* Dark mode (now default) - dark grey tones */
   --bg-primary: #0f0f13;
   --bg-secondary: #16161d;
   --bg-tertiary: #1e1e28;
@@ -35,8 +31,30 @@
   --tag-text: #94a3b8;
   --code-bg: #1e1e2e;
   --hover-bg: #1a1a24;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
   --accent-subtle: #172554;
   --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+.light {
+  /* Light mode (formerly dark) - clean white background */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f0f1f3;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a5568;
+  --text-tertiary: #718096;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e0;
+  --tag-bg: #edf2f7;
+  --tag-text: #2d3748;
+  --code-bg: #f1f5f9;
+  --hover-bg: #f7fafc;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-subtle: #eff6ff;
+  --shadow-color: rgba(0, 0, 0, 0.06);
 }
 
 @layer base {
@@ -49,7 +67,7 @@
   }
 
   ::selection {
-    background-color: #3b82f6;
+    background-color: var(--accent);
     color: white;
   }
 }
@@ -78,7 +96,7 @@
 
   .input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
@@ -88,11 +106,12 @@
 
   /* Button variants */
   .btn-primary {
-    @apply px-4 py-2 bg-accent text-white rounded-md font-medium transition-colors;
+    @apply px-4 py-2 text-white rounded-md font-medium transition-colors;
+    background-color: var(--accent);
   }
 
   .btn-primary:hover {
-    @apply bg-accent-hover;
+    background-color: var(--accent-hover);
   }
 
   .btn-secondary {
@@ -120,7 +139,7 @@
   .agent-badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full;
     background-color: var(--accent-subtle);
-    color: #3b82f6;
+    color: var(--accent);
   }
 
   /* Vote button */
@@ -175,7 +194,7 @@
 .prose-agora code {
   background-color: var(--code-bg);
   @apply px-1.5 py-0.5 rounded text-sm font-mono;
-  color: #3b82f6;
+  color: var(--accent);
 }
 .prose-agora pre {
   background-color: var(--code-bg);
@@ -186,7 +205,8 @@
   color: var(--text-primary);
 }
 .prose-agora a {
-  @apply text-accent hover:underline;
+  color: var(--accent);
+  @apply hover:underline;
 }
 .prose-agora blockquote {
   @apply border-l-4 pl-4 my-4 italic;

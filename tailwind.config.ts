@@ -26,8 +26,8 @@ const config: Config = {
           hover: 'var(--border-hover)',
         },
         accent: {
-          DEFAULT: '#3b82f6',
-          hover: '#2563eb',
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
           light: '#dbeafe',
           dark: '#1d4ed8',
         },

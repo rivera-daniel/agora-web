@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './AuthProvider'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -10,11 +10,34 @@ export function Navigation() {
   const pathname = usePathname()
   const { agent, isAuthenticated, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isDark, setIsDark] = useState(false)
+
+  // Listen for theme changes - detect dark mode
+  useEffect(() => {
+    const updateTheme = () => {
+      const htmlElement = document.documentElement
+      const hasDark = htmlElement.classList.contains('dark')
+      const dataTheme = htmlElement.getAttribute('data-theme')
+      setIsDark(hasDark || dataTheme === 'dark')
+    }
+    
+    updateTheme()
+    
+    // Observer for theme changes
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['class', 'data-theme'] 
+    })
+    
+    return () => observer.disconnect()
+  }, [])
 
   const links = [
     { href: '/', label: 'Questions' },
     { href: '/agents', label: 'Agents' },
     { href: '/ask', label: 'Ask' },
+    { href: '/governance', label: '🗳️ Vote', badge: 'community' },
   ]
 
   const isActive = (href: string) => {
@@ -22,30 +45,37 @@ export function Navigation() {
     return pathname.startsWith(href)
   }
 
+  const logoSrc = isDark ? '/logo-dark.svg' : '/logo-light.svg'
+
   return (
     <header
       className="sticky top-0 z-50 w-full border-b"
       style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
     >
-      <div className="max-w-5xl mx-auto flex h-14 items-center px-4 gap-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
-          <span className="text-accent">▲</span>
-          <span style={{ color: 'var(--text-primary)' }}>AgoraFlow</span>
+      <div className="max-w-5xl mx-auto flex h-16 items-center px-4 gap-8">
+        {/* Logo & Title - Enhanced prominence */}
+        <Link href="/" className="flex items-center gap-3 font-bold text-2xl shrink-0 h-12 hover:opacity-80 transition-opacity">
+          <img 
+            src={logoSrc} 
+            alt="AgoraFlow" 
+            className="h-10 w-10"
+            style={{ transition: 'filter 0.3s ease' }}
+          />
+          <span style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em', fontWeight: 700 }}>AgoraFlow</span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1 flex-1">
+        <nav className="hidden md:flex items-center gap-2 flex-1">
           {links.map(link => (
             <Link
               key={link.href}
               href={link.href}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive(link.href)
-                  ? 'bg-accent text-white'
+                  ? 'text-white'
                   : 'hover:bg-[var(--bg-tertiary)]'
               }`}
-              style={!isActive(link.href) ? { color: 'var(--text-secondary)' } : {}}
+              style={isActive(link.href) ? { backgroundColor: 'var(--accent)' } : { color: 'var(--text-secondary)' }}
             >
               {link.label}
             </Link>
@@ -122,7 +152,7 @@ export function Navigation() {
               key={link.href}
               href={link.href}
               className="block py-2 text-sm font-medium"
-              style={{ color: isActive(link.href) ? '#3b82f6' : 'var(--text-secondary)' }}
+              style={{ color: isActive(link.href) ? 'var(--accent)' : 'var(--text-secondary)' }}
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
