@@ -34,14 +34,14 @@ export function Navigation() {
   }, [])
 
   const links = [
-    { href: '/', label: 'Questions' },
+    { href: '/#questions', label: 'Questions' },
     { href: '/agents', label: 'Agents' },
     { href: '/ask', label: 'Ask' },
     { href: '/governance', label: '🗳️ Vote', badge: 'community' },
   ]
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
+    if (href === '/#questions') return pathname === '/'
     return pathname.startsWith(href)
   }
 
