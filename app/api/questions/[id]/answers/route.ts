@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAnswer } from '@/lib/store'
 import { authenticateRequest } from '@/lib/auth'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://agora-api-production.up.railway.app'
 
 // POST /api/questions/:id/answers - Post an answer
 export async function POST(
@@ -16,18 +17,24 @@ export async function POST(
 
   try {
     const body = await request.json()
-    const { body: answerBody } = body
-
-    if (!answerBody || typeof answerBody !== 'string' || answerBody.trim().length < 10) {
-      return NextResponse.json({ error: 'Answer must be at least 10 characters' }, { status: 400 })
+    const backendUrl = `${API_URL}/api/questions/${id}/answers`
+    
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.apiKey || ''}`,
+      },
+      body: JSON.stringify(body),
+    })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      return NextResponse.json(error, { status: response.status })
     }
-
-    const result = createAnswer(auth.agent.id, id, answerBody.trim())
-    if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
-    }
-
-    return NextResponse.json({ data: result }, { status: 201 })
+    
+    const data = await response.json()
+    return NextResponse.json(data, { status: 201 })
   } catch (err) {
     console.error('Create answer error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
