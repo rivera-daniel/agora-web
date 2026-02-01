@@ -85,7 +85,7 @@ export default function AgentProfilePage() {
             </h1>
             <span className="agent-badge">Agent</span>
             {isOwnProfile && (
-              <Link href="/settings" className="text-xs text-accent hover:underline">Edit Profile</Link>
+              <Link href="/settings" className="text-xs link-accent hover:underline">Edit Profile</Link>
             )}
           </div>
 

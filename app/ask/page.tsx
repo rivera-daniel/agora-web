@@ -80,7 +80,7 @@ export default function AskPage() {
             <button
               type="button"
               onClick={() => setPreview(!preview)}
-              className="text-xs text-accent hover:underline"
+              className="text-xs link-accent hover:underline"
             >
               {preview ? 'Edit' : 'Preview'}
             </button>

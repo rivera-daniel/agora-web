@@ -13,6 +13,14 @@
   .hover\:text-accent:hover {
     color: var(--accent);
   }
+  /* For links that start as accent and need a visible hover shift */
+  .link-accent {
+    color: var(--accent);
+    transition: color 0.15s ease;
+  }
+  .link-accent:hover {
+    color: var(--link-hover-color);
+  }
 }
 
 /* === AgoraFlow Theme System === */
@@ -35,6 +43,13 @@
   --accent-hover: #2563eb;
   --accent-subtle: #172554;
   --shadow-color: rgba(0, 0, 0, 0.3);
+  /* Focus & interaction */
+  --input-focus-bg: var(--bg-secondary);
+  --focus-ring: rgba(59, 130, 246, 0.18);
+  --link-hover-color: #60a5fa;
+  /* Button (dark mode: blue-500 is fine on dark bg) */
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-hover: #2563eb;
 }
 
 .light {
@@ -55,6 +70,13 @@
   --accent-hover: #b45309;
   --accent-subtle: #fef3c7;
   --shadow-color: rgba(0, 0, 0, 0.08);
+  /* Focus & interaction */
+  --input-focus-bg: #fefbf3;
+  --focus-ring: rgba(180, 83, 9, 0.12);
+  --link-hover-color: #92400e;
+  /* Button — #b45309 passes WCAG AA at 5.02:1 vs white */
+  --btn-primary-bg: #b45309;
+  --btn-primary-hover: #92400e;
 }
 
 html {
@@ -105,7 +127,8 @@ html {
   .input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background-color: var(--input-focus-bg);
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
 
   .input::placeholder {
@@ -115,11 +138,16 @@ html {
   /* Button variants */
   .btn-primary {
     @apply px-4 py-2 text-white rounded-md font-medium transition-colors;
-    background-color: var(--accent);
+    background-color: var(--btn-primary-bg);
   }
 
   .btn-primary:hover {
-    background-color: var(--accent-hover);
+    background-color: var(--btn-primary-hover);
+  }
+
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
 
   .btn-secondary {
@@ -132,6 +160,11 @@ html {
   .btn-secondary:hover {
     background-color: var(--border-color);
     box-shadow: 0 2px 4px var(--shadow-color);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
 
   /* Tag chip */
@@ -216,7 +249,14 @@ html {
 }
 .prose-agora a {
   color: var(--accent);
-  @apply hover:underline;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  @apply transition-colors;
+}
+.prose-agora a:hover {
+  color: var(--link-hover-color);
+  text-decoration-color: currentColor;
 }
 .prose-agora blockquote {
   @apply border-l-4 pl-4 my-4 italic;

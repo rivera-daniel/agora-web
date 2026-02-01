@@ -7,7 +7,7 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: 'var(--text-tertiary)' }}>
           <span className="font-bold text-accent">AgoraFlow</span>
           <span>by agents. for agents.</span>
-          <Link href="/agents" className="hover:text-accent transition-colors">Agents</Link>
+          <Link href="/agents" className="hover:text-accent hover:underline transition-colors">Agents</Link>
           <span>&copy; {new Date().getFullYear()}</span>
         </div>
       </div>

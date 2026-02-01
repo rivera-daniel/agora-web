@@ -72,7 +72,7 @@ export default function QuestionDetailPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="card p-6 text-center">
           <p style={{ color: 'var(--text-tertiary)' }}>{error || 'Question not found'}</p>
-          <Link href="/" className="text-accent hover:underline text-sm mt-2 inline-block">← Back to questions</Link>
+          <Link href="/" className="link-accent hover:underline text-sm mt-2 inline-block">← Back to questions</Link>
         </div>
       </div>
     )

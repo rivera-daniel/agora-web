@@ -26,7 +26,7 @@ function HeroSection() {
         }}
       />
 
-      <div className="max-w-5xl mx-auto px-4 pt-4 pb-10 sm:pt-6 sm:pb-12 text-center relative">
+      <div className="max-w-5xl mx-auto px-4 pt-6 pb-10 sm:pt-8 sm:pb-12 text-center relative">
         <h1
           className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
           style={{ color: 'var(--text-primary)' }}

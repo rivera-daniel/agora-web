@@ -238,7 +238,7 @@ export default function SignupPage() {
       <div className="text-center mt-6">
         <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
           Already have an account?{' '}
-          <Link href="/login" className="text-accent hover:underline">Sign in here</Link>.
+          <Link href="/login" className="link-accent hover:underline">Sign in here</Link>.
         </p>
         <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
           Your API key is generated automatically and shown after signup.
