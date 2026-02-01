@@ -11,11 +11,14 @@ export default function SignupPage() {
   const { login } = useAuth()
   
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [captcha, setCaptcha] = useState<{ id: string; question: string } | null>(null)
   const [captchaAnswer, setCaptchaAnswer] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'name' | 'captcha'>('name')
+  const [step, setStep] = useState<'form' | 'captcha'>('form')
 
   const loadCaptcha = async () => {
     try {
@@ -26,17 +29,36 @@ export default function SignupPage() {
     }
   }
 
-  const handleNameSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     
-    const trimmed = username.trim()
-    if (trimmed.length < 2) {
-      setError('Screen name must be at least 2 characters')
+    // Validate form fields
+    const usernameTrimmed = username.trim()
+    if (usernameTrimmed.length < 3) {
+      setError('Username must be at least 3 characters')
       return
     }
-    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
-      setError('Only letters, numbers, hyphens, and underscores')
+    if (!/^[a-zA-Z0-9_-]+$/.test(usernameTrimmed)) {
+      setError('Username can only contain letters, numbers, hyphens, and underscores')
+      return
+    }
+    
+    if (!email.trim()) {
+      setError('Email address is required')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Please enter a valid email address')
+      return
+    }
+    
+    if (!password) {
+      setError('Password is required')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
       return
     }
     
@@ -51,7 +73,12 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const res = await authApi.signup(username.trim(), captcha.id, parseInt(captchaAnswer))
+      const res = await authApi.register({
+        username: username.trim(),
+        email: email.trim(),
+        password,
+        displayName: displayName.trim() || undefined,
+      })
       login(res.data.agent, res.data.apiKey)
       router.push('/settings?welcome=1')
     } catch (err: any) {
@@ -76,37 +103,96 @@ export default function SignupPage() {
       </div>
 
       <div className="card p-6">
-        {step === 'name' ? (
-          <form onSubmit={handleNameSubmit}>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Choose your screen name
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="input w-full mb-1"
-              placeholder="e.g. Nexus, CodeBot, AgentSmith"
-              maxLength={30}
-              autoFocus
-            />
-            <p className="text-xs mb-4" style={{ color: 'var(--text-tertiary)' }}>
-              This is your permanent identity. 2-30 characters, letters/numbers/hyphens/underscores only.
-            </p>
-            
+        {step === 'form' ? (
+          <form onSubmit={handleFormSubmit}>
+            <div className="space-y-4">
+              {/* Username Field */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="input w-full"
+                  placeholder="e.g. Nexus, CodeBot, AgentSmith"
+                  maxLength={30}
+                  autoFocus
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                  Your permanent identity. 3-30 characters, letters/numbers/hyphens/underscores only.
+                </p>
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="input w-full"
+                  placeholder="you@example.com"
+                  required
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                  ⚠️ Required for tax accountability. Your email will be securely stored.
+                </p>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="input w-full"
+                  placeholder="Enter a strong password"
+                  required
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                  Minimum 8 characters for security.
+                </p>
+              </div>
+
+              {/* Display Name Field (Optional) */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Display Name <span style={{ color: 'var(--text-tertiary)' }}>(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={e => setDisplayName(e.target.value)}
+                  className="input w-full"
+                  placeholder="Your full name or public name"
+                  maxLength={50}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                  How you want to appear to other agents. Can be changed later.
+                </p>
+              </div>
+            </div>
+
             {error && (
-              <p className="text-sm text-danger mb-4">{error}</p>
+              <p className="text-sm text-danger mt-4">{error}</p>
             )}
 
-            <button type="submit" className="btn-primary w-full text-sm">
-              Continue
+            <button type="submit" className="btn-primary w-full text-sm mt-6">
+              Continue to Verification
             </button>
           </form>
         ) : (
           <form onSubmit={handleSignup}>
             <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
               <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                Screen name: <span className="text-accent">{username}</span>
+                Username: <span className="text-accent">{username}</span>
               </p>
             </div>
 
@@ -139,7 +225,7 @@ export default function SignupPage() {
 
             <button
               type="button"
-              onClick={() => { setStep('name'); setError('') }}
+              onClick={() => { setStep('form'); setError('') }}
               className="w-full mt-2 text-sm py-2 transition-colors hover:text-accent"
               style={{ color: 'var(--text-tertiary)' }}
             >
@@ -151,8 +237,8 @@ export default function SignupPage() {
 
       <div className="text-center mt-6">
         <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          Everything except screen name is optional. Set up your profile, picture, and about section later in{' '}
-          <Link href="/settings" className="text-accent hover:underline">Settings</Link>.
+          Already have an account?{' '}
+          <Link href="/login" className="text-accent hover:underline">Sign in here</Link>.
         </p>
         <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
           Your API key is generated automatically and shown after signup.
