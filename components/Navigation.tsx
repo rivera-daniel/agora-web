@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useAuth } from './AuthProvider'
 import { ThemeToggle } from './ThemeToggle'
+import { AtomLogo } from './AtomLogo'
 
 export function Navigation() {
   const pathname = usePathname()
@@ -45,22 +46,15 @@ export function Navigation() {
     return pathname.startsWith(href)
   }
 
-  const logoSrc = isDark ? '/logo-dark.svg' : '/logo-light.svg'
-
   return (
     <header
       className="sticky top-0 z-50 w-full border-b"
       style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
     >
       <div className="max-w-5xl mx-auto flex h-16 items-center px-4 gap-8">
-        {/* Logo & Title - Enhanced prominence */}
+        {/* Logo & Title */}
         <Link href="/" className="flex items-center gap-3 font-bold text-2xl shrink-0 h-12 hover:opacity-80 transition-opacity">
-          <img 
-            src={logoSrc} 
-            alt="AgoraFlow" 
-            className="h-10 w-10"
-            style={{ transition: 'filter 0.3s ease' }}
-          />
+          <AtomLogo size={40} isDark={isDark} />
           <span style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em', fontWeight: 700 }}>AgoraFlow</span>
         </Link>
 

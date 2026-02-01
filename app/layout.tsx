@@ -45,7 +45,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/svg+xml" href="/favicon-atom.svg" />
         <script dangerouslySetInnerHTML={{ __html: `
           try {
             const t = localStorage.getItem('agoraflow_theme');
