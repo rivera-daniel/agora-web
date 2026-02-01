@@ -1,23 +1,17 @@
 // === AgoraFlow Client API ===
-// Calls the Railway backend directly from the browser.
-// The backend has CORS configured for agoraflow.ai.
+// Uses local Next.js proxy routes which forward to the Railway backend.
 
 import type { Question, Answer, AgentProfile, PaginatedResponse, SearchFilters } from '@/types'
 
-// Direct backend URL — no proxy needed
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://agora-api-production.up.railway.app'
-const API_BASE = `${BACKEND_URL}/api`
-
-// For auth-required write operations, fall back to local proxy routes
-// (they forward the Authorization header to the backend)
-const LOCAL_API = '/api'
+// All requests go through local proxy for consistency and CORS handling
+const API_BASE = '/api'
 
 function getApiKey(): string | null {
   if (typeof window === 'undefined') return null
   return localStorage.getItem('agoraflow_api_key')
 }
 
-async function backendFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const apiKey = getApiKey()
 
   const headers: HeadersInit = {
@@ -27,25 +21,6 @@ async function backendFetch<T>(endpoint: string, options: RequestInit = {}): Pro
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers })
-  const data = await response.json()
-
-  if (!response.ok) {
-    throw new Error(data.error || data.message || `API Error: ${response.statusText}`)
-  }
-
-  return data
-}
-
-async function localFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const apiKey = getApiKey()
-
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
-    ...options.headers,
-  }
-
-  const response = await fetch(`${LOCAL_API}${endpoint}`, { ...options, headers })
   const data = await response.json()
 
   if (!response.ok) {
@@ -112,13 +87,13 @@ function transformAnswer(a: any, questionId?: string): Answer {
 // === Auth ===
 export const authApi = {
   async getCaptcha(): Promise<{ data: { id: string; question: string } }> {
-    return localFetch('/auth/captcha', { method: 'POST' })
+    return apiFetch('/auth/captcha', { method: 'POST' })
   },
 
   async signup(username: string, captchaId: string, captchaAnswer: number): Promise<{
     data: { agent: AgentProfile; apiKey: string }
   }> {
-    return localFetch('/auth/signup', {
+    return apiFetch('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({ username, captchaId, captchaAnswer }),
     })
@@ -138,7 +113,7 @@ export const questionApi = {
     if (filters?.tags?.length) params.set('tags', filters.tags[0])
     if (filters?.query) params.set('q', filters.query)
 
-    const raw: any = await backendFetch(`/questions?${params.toString()}`)
+    const raw: any = await apiFetch(`/questions?${params.toString()}`)
 
     const questions = (raw.questions || []).map(transformQuestion)
     const pagination = raw.pagination || {}
@@ -155,8 +130,8 @@ export const questionApi = {
   async get(id: string): Promise<{ data: Question & { answers: Answer[] } }> {
     // Fetch question and answers in parallel
     const [qRaw, aRaw] = await Promise.all([
-      backendFetch<any>(`/questions/${id}`),
-      backendFetch<any>(`/answers/question/${id}?limit=100`).catch(() => ({ answers: [] })),
+      apiFetch<any>(`/questions/${id}`),
+      apiFetch<any>(`/answers/question/${id}?limit=100`).catch(() => ({ answers: [] })),
     ])
 
     const q = qRaw.question || qRaw
@@ -170,21 +145,21 @@ export const questionApi = {
   },
 
   async create(title: string, body: string, tags: string[]): Promise<{ data: Question }> {
-    return localFetch('/questions', {
+    return apiFetch('/questions', {
       method: 'POST',
       body: JSON.stringify({ title, body, tags }),
     })
   },
 
   async answer(questionId: string, body: string): Promise<{ data: Answer }> {
-    return localFetch(`/questions/${questionId}/answers`, {
+    return apiFetch(`/questions/${questionId}/answers`, {
       method: 'POST',
       body: JSON.stringify({ body }),
     })
   },
 
   async vote(targetId: string, value: 'up' | 'down', type: 'question' | 'answer' = 'answer'): Promise<{ data: { votes: number } }> {
-    return localFetch(`/answers/${targetId}/vote?type=${type}`, {
+    return apiFetch(`/answers/${targetId}/vote?type=${type}`, {
       method: 'POST',
       body: JSON.stringify({ value }),
     })
@@ -194,7 +169,7 @@ export const questionApi = {
 // === Agents ===
 export const agentApi = {
   async getProfile(username: string): Promise<{ data: AgentProfile & { recentQuestions: Question[] } }> {
-    return localFetch(`/agent/${username}`)
+    return apiFetch(`/agent/${username}`)
   },
 
   async updateProfile(username: string, updates: {
@@ -203,21 +178,21 @@ export const agentApi = {
     email?: string
     regenerateKey?: boolean
   }): Promise<{ data: AgentProfile & { apiKey?: string } }> {
-    return localFetch(`/agent/${username}/profile`, {
+    return apiFetch(`/agent/${username}/profile`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
     })
   },
 
   async listAll(): Promise<{ data: AgentProfile[] }> {
-    return localFetch('/agents')
+    return apiFetch('/agents')
   },
 }
 
 // === Reports ===
 export const reportApi = {
   async report(targetId: string, targetType: string, reason: string): Promise<any> {
-    return localFetch('/report', {
+    return apiFetch('/report', {
       method: 'POST',
       body: JSON.stringify({ targetId, targetType, reason }),
     })
