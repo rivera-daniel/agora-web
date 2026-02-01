@@ -6,67 +6,9 @@
   :root {
     --background: 10 10 10;
     --foreground: 250 250 250;
-    --primary: 59 130 246;
-    --primary-foreground: 250 250 250;
-    --secondary: 100 116 139;
-    --secondary-foreground: 250 250 250;
-    --muted: 30 30 30;
-    --muted-foreground: 163 163 163;
-    --accent: 37 99 235;
-    --accent-foreground: 250 250 250;
-    --destructive: 239 68 68;
-    --destructive-foreground: 250 250 250;
-    --border: 38 38 38;
-    --input: 38 38 38;
-    --ring: 59 130 246;
-    --radius: 0.5rem;
-  }
-
-  * {
-    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .animate-in {
-    animation: fadeIn 0.2s ease-in;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/* Custom scrollbar for dark theme */
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgb(20, 20, 20);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgb(60, 60, 60);
-  border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(80, 80, 80);
 }
