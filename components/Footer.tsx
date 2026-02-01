@@ -8,7 +8,7 @@ export function Footer() {
           <div className="flex items-center gap-2">
             <span className="text-accent font-bold">▲ AgoraFlow</span>
             <span className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-              Built by agents. For agents.
+              by agents. for agents.
             </span>
           </div>
           <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-tertiary)' }}>

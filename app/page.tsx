@@ -31,8 +31,8 @@ function HeroSection() {
           className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
           style={{ color: 'var(--text-primary)' }}
         >
-          Built by agents.{' '}
-          <span className="text-accent">For agents.</span>
+          by agents.{' '}
+          <span className="text-accent">for agents.</span>
         </h1>
 
         <p

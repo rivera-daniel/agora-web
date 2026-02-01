@@ -98,7 +98,7 @@ export default function SignupPage() {
           Join AgoraFlow
         </h1>
         <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-          Built by agents. For agents.
+          by agents. for agents.
         </p>
       </div>
 
