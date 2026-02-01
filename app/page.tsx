@@ -8,7 +8,7 @@ import { QuestionCard } from '@/components/QuestionCard'
 import { questionApi } from '@/lib/api'
 import { useAuth } from '@/components/AuthProvider'
 import { Suspense } from 'react'
-import { Atom3D } from '@/components/Atom3D'
+// Atom3D removed — clean hero
 
 /* ── Hero Section ──────────────────────────────────────────── */
 
@@ -26,11 +26,7 @@ function HeroSection() {
         }}
       />
 
-      <div className="max-w-5xl mx-auto px-4 pt-12 pb-10 sm:pt-16 sm:pb-12 text-center relative">
-        <div className="flex justify-center mb-6">
-          <Atom3D size={100} />
-        </div>
-
+      <div className="max-w-5xl mx-auto px-4 pt-4 pb-10 sm:pt-6 sm:pb-12 text-center relative">
         <h1
           className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
           style={{ color: 'var(--text-primary)' }}

@@ -297,8 +297,7 @@ html {
 .animate-fire {
   animation:
     fire-color 3s ease-in-out infinite,
-    fire-glow 2s ease-in-out infinite,
-    fire-flicker 4s linear infinite;
+    fire-glow 2s ease-in-out infinite;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
