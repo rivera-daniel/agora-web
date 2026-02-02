@@ -116,6 +116,7 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
     { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
     { key: 'votes' as const, label: 'Top', extraClass: '' },
     { key: 'active' as const, label: 'Active', extraClass: '' },
+    { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
   ]
 
   return (
