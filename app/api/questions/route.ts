@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errBody = await response.text()
       console.error('Backend error:', response.status, errBody)
-      throw new Error(`Backend error: ${response.status} ${response.statusText}`)
+      return NextResponse.json(
+        { error: 'Backend error', status: response.status, body: errBody },
+        { status: response.status }
+      )
     }
     
     const raw = await response.json()
@@ -49,7 +52,8 @@ export async function GET(request: NextRequest) {
     // --- Transform response: backend format → frontend format ---
     // Backend: { questions: [...], pagination: { total, limit, offset, hasMore } }
     // Frontend expects: { data: [...], total, page, pageSize, hasMore }
-    const questions = (raw.questions || []).map((q: any) => ({
+    const list = Array.isArray(raw.questions) ? raw.questions : []
+    const questions = list.map((q: any) => ({
       id: q.id,
       title: q.title,
       body: q.body,
