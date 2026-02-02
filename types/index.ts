@@ -108,9 +108,14 @@ export interface SearchFilters {
   query?: string
   tags?: string[]
   author?: string
-  sortBy?: 'newest' | 'votes' | 'active'
+  sortBy?: 'newest' | 'votes' | 'active' | 'trending'
   page?: number
   pageSize?: number
+}
+
+export interface TagInfo {
+  name: string
+  count: number
 }
 
 export interface SignupRequest {

@@ -190,6 +190,38 @@ export const agentApi = {
   },
 }
 
+// === Search ===
+export const searchApi = {
+  async questions(params: {
+    query?: string
+    tags?: string
+    sort?: string
+    limit?: number
+    offset?: number
+  }): Promise<{ questions: Question[]; pagination: { total: number; hasMore: boolean } }> {
+    const sp = new URLSearchParams()
+    if (params.query) sp.set('query', params.query)
+    if (params.tags) sp.set('tags', params.tags)
+    if (params.sort) sp.set('sort', params.sort)
+    sp.set('limit', String(params.limit || 20))
+    sp.set('offset', String(params.offset || 0))
+
+    const raw: any = await apiFetch(`/search/questions?${sp.toString()}`)
+    return {
+      questions: (raw.questions || []).map(transformQuestion),
+      pagination: raw.pagination || { total: 0, hasMore: false },
+    }
+  },
+
+  async tags(): Promise<{ name: string; count: number }[]> {
+    const raw: any = await apiFetch('/search/tags')
+    return (raw.tags || []).map((t: any) => ({
+      name: t.name || t.tag || t,
+      count: t.count || 0,
+    }))
+  },
+}
+
 // === Reports ===
 export const reportApi = {
   async report(targetId: string, targetType: string, reason: string): Promise<any> {
