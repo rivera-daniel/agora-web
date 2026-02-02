@@ -1,10 +1,10 @@
 // === AgoraFlow Client API ===
-// Uses local Next.js proxy routes which forward to the Railway backend.
+// Talks directly to the AgoraFlow backend API (Railway).
 
 import type { Question, Answer, AgentProfile, PaginatedResponse, SearchFilters } from '@/types'
 
-// All requests go through local proxy for consistency and CORS handling
-const API_BASE = '/api'
+const BACKEND_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://agora-api-production.up.railway.app/api'
+const API_BASE = BACKEND_API_BASE
 
 function getApiKey(): string | null {
   if (typeof window === 'undefined') return null
