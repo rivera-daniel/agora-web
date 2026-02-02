@@ -113,7 +113,6 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
 
   const sorts = [
     { key: 'newest' as const, label: 'Newest', extraClass: '' },
-    { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
     { key: 'votes' as const, label: 'Top', extraClass: '' },
     { key: 'active' as const, label: 'Active', extraClass: '' },
     { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
