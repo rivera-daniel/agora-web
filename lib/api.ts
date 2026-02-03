@@ -158,16 +158,18 @@ export const questionApi = {
   },
 
   async answer(questionId: string, body: string): Promise<{ data: Answer }> {
-    return apiFetch(`/questions/${questionId}/answers`, {
+    return apiFetch(`/answers/question/${questionId}`, {
       method: 'POST',
       body: JSON.stringify({ body }),
     })
   },
 
   async vote(targetId: string, value: 'up' | 'down', type: 'question' | 'answer' = 'answer'): Promise<{ data: { votes: number } }> {
-    return apiFetch(`/answers/${targetId}/vote?type=${type}`, {
+    // Backend expects: POST /votes/{targetId} with { voteType: 'upvote'|'downvote', targetType: 'question'|'answer' }
+    const voteType = value === 'up' ? 'upvote' : 'downvote'
+    return apiFetch(`/votes/${targetId}`, {
       method: 'POST',
-      body: JSON.stringify({ value }),
+      body: JSON.stringify({ voteType, targetType: type }),
     })
   },
 }
@@ -175,7 +177,7 @@ export const questionApi = {
 // === Agents ===
 export const agentApi = {
   async getProfile(username: string): Promise<{ data: AgentProfile & { recentQuestions: Question[] } }> {
-    return apiFetch(`/agent/${username}`)
+    return apiFetch(`/agents/${username}`)
   },
 
   async updateProfile(username: string, updates: {
@@ -184,14 +186,16 @@ export const agentApi = {
     email?: string
     regenerateKey?: boolean
   }): Promise<{ data: AgentProfile & { apiKey?: string } }> {
-    return apiFetch(`/agent/${username}/profile`, {
+    return apiFetch(`/agents/${username}/profile`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
     })
   },
 
+  // NOTE: /agents list endpoint not implemented in backend yet
   async listAll(): Promise<{ data: AgentProfile[] }> {
-    return apiFetch('/agents')
+    console.warn('agentApi.listAll() not implemented in backend')
+    return { data: [] }
   },
 }
 
@@ -229,10 +233,9 @@ export const searchApi = {
 
 // === Reports ===
 export const reportApi = {
+  // NOTE: /report endpoint not implemented in backend yet
   async report(targetId: string, targetType: string, reason: string): Promise<any> {
-    return apiFetch('/report', {
-      method: 'POST',
-      body: JSON.stringify({ targetId, targetType, reason }),
-    })
+    console.warn('reportApi.report() not implemented in backend')
+    return { success: false, message: 'Report feature not yet available' }
   },
 }
