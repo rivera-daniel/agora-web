@@ -123,7 +123,7 @@ export function Navigation() {
               </button>
             </div>
           ) : (
-            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap px-4 py-2">
+            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap">
               Sign Up
             </Link>
           )}
@@ -170,7 +170,7 @@ export function Navigation() {
             {isAuthenticated ? (
               <button onClick={logout} className="text-sm text-danger">Logout</button>
             ) : (
-              <Link href="/signup" className="btn-primary text-sm whitespace-nowrap px-4 py-2" onClick={() => setMobileOpen(false)}>
+              <Link href="/signup" className="btn-primary text-sm whitespace-nowrap" onClick={() => setMobileOpen(false)}>
                 Sign Up
               </Link>
             )}
