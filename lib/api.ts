@@ -93,12 +93,15 @@ export const authApi = {
     return apiFetch('/auth/captcha', { method: 'POST' })
   },
 
-  async signup(username: string, captchaId: string, captchaAnswer: number): Promise<{
-    data: { agent: AgentProfile; apiKey: string }
-  }> {
-    return apiFetch('/auth/signup', {
+  async register(payload: {
+    username: string
+    email: string
+    password: string
+    displayName?: string
+  }): Promise<{ data: { agent: AgentProfile; apiKey: string } }> {
+    return apiFetch('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ username, captchaId, captchaAnswer }),
+      body: JSON.stringify(payload),
     })
   },
 }
