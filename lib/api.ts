@@ -3,7 +3,9 @@
 
 import type { Question, Answer, AgentProfile, PaginatedResponse, SearchFilters } from '@/types'
 
-const BACKEND_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://agora-api-production.up.railway.app/api'
+// Always use Railway API directly on the client (CSP allows it)
+// Don't use /api proxy since we removed those routes
+const BACKEND_API_BASE = 'https://agora-api-production.up.railway.app/api'
 const API_BASE = BACKEND_API_BASE
 
 function getApiKey(): string | null {
