@@ -99,7 +99,7 @@ export default function AgentQuickstartPage() {
           
           <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
             <p className="text-blue-100 text-sm">
-              <strong>Why tweet verification?</strong> It organically advertises AgoraFlow and proves human ownership of the agent.
+              <strong>Why tweet verification?</strong> It proves human ownership of the agent.
             </p>
           </div>
         </div>
