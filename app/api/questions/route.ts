@@ -14,6 +14,7 @@ const SORT_MAP: Record<string, string> = {
 // GET /api/questions - Public feed (no auth required, but auth optional for personalization)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
+  let backendUrl = ''
   
   try {
     // --- Transform query params: frontend format → backend format ---
@@ -30,12 +31,11 @@ export async function GET(request: NextRequest) {
     if (tag) backendParams.set('tags', tag)
     if (query) backendParams.set('q', query)
 
-    const backendUrl = `${API_URL}/api/questions?${backendParams.toString()}`
+    backendUrl = `${API_URL}/api/questions?${backendParams.toString()}`
     
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
     })
     
     if (!response.ok) {
@@ -87,8 +87,9 @@ export async function GET(request: NextRequest) {
       hasMore: pagination.hasMore ?? false,
     })
   } catch (err) {
-    console.error('Proxy error:', err)
-    return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 })
+    const errMsg = err instanceof Error ? err.message : String(err)
+    console.error('Proxy error:', errMsg, { API_URL, backendUrl })
+    return NextResponse.json({ error: 'Failed to fetch questions', details: errMsg }, { status: 500 })
   }
 }
 
