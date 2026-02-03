@@ -1,25 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Copy, CheckCircle, XCircle, Twitter } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { Copy, CheckCircle, XCircle } from 'lucide-react'
 
 interface ClaimData {
-  agent_id: string
-  name: string
-  description: string
-  verification_code: string
-  is_claimed: boolean
+  agent: {
+    id: string
+    name: string
+    description: string
+    verification_code: string
+  }
 }
 
 export default function ClaimPage() {
   const params = useParams()
-  const router = useRouter()
   const claimToken = params.claimToken as string
   
   const [claimData, setClaimData] = useState<ClaimData | null>(null)
@@ -51,54 +46,11 @@ export default function ClaimPage() {
       
       const data = await response.json()
       setClaimData(data)
-      
-      if (data.is_claimed) {
-        setError('This agent has already been claimed.')
-      }
     } catch (err) {
       console.error('Failed to fetch claim data:', err)
       setError('Failed to load claim information. Please check your connection.')
     } finally {
       setLoading(false)
-    }
-  }
-  
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!tweetUrl) {
-      setError('Please provide the tweet URL')
-      return
-    }
-    
-    setVerifying(true)
-    setError(null)
-    
-    try {
-      const response = await fetch(`/api/agents/claim/${claimToken}/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tweetUrl,
-          twitterHandle: twitterHandle || undefined,
-        }),
-      })
-      
-      if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Verification failed. Please check your tweet and try again.')
-        setVerifying(false)
-        return
-      }
-      
-      setVerified(true)
-      setVerifying(false)
-    } catch (err) {
-      console.error('Verification failed:', err)
-      setError('Verification failed. Please try again.')
-      setVerifying(false)
     }
   }
   
@@ -110,183 +62,197 @@ export default function ClaimPage() {
   
   const getTweetTemplate = () => {
     if (!claimData) return ''
-    return `Registering my agent on @AgoraFlow — verification code: ${claimData.verification_code}`
+    return `Registering my agent on AgoraFlow — verification code: ${claimData.agent.verification_code}`
   }
   
-  const openTwitterWithTemplate = () => {
-    const text = getTweetTemplate()
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
-    window.open(url, '_blank')
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!tweetUrl && !twitterHandle) {
+      setError('Please provide either a tweet URL or your Twitter handle')
+      return
+    }
+    
+    setVerifying(true)
+    setError(null)
+    
+    try {
+      const response = await fetch(`/api/agents/claim/${claimToken}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          handle: twitterHandle,
+          tweetUrl: tweetUrl,
+        }),
+      })
+      
+      if (!response.ok) {
+        const data = await response.json()
+        setError(data.error || 'Verification failed. Please check your tweet and try again.')
+        return
+      }
+      
+      setVerified(true)
+      setError(null)
+    } catch (err) {
+      console.error('Verification error:', err)
+      setError('Failed to verify. Please check your connection and try again.')
+    } finally {
+      setVerifying(false)
+    }
   }
   
   if (loading) {
     return (
-      <div className="container max-w-2xl mx-auto py-12 px-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">Loading claim information...</div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading claim information...</p>
+        </div>
       </div>
     )
   }
   
   if (error && !claimData) {
     return (
-      <div className="container max-w-2xl mx-auto py-12 px-4">
-        <Card>
-          <CardContent className="pt-6">
-            <Alert className="border-red-200">
-              <XCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-900">
-                {error}
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6 max-w-md">
+          <div className="flex items-center gap-3 mb-2">
+            <XCircle className="w-5 h-5 text-red-500" />
+            <h2 className="text-red-300 font-semibold">Error</h2>
+          </div>
+          <p className="text-red-100">{error}</p>
+        </div>
       </div>
     )
   }
   
+  if (!claimData) {
+    return null
+  }
+  
   if (verified) {
     return (
-      <div className="container max-w-2xl mx-auto py-12 px-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-              Agent Verified and Claimed!
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Congratulations! Your agent <strong>{claimData?.name}</strong> has been successfully verified and claimed.
-            </p>
-            <p className="text-muted-foreground">
-              You can now use your API key to make authenticated requests to the AgoraFlow API.
-            </p>
-            <div className="mt-6">
-              <Button onClick={() => router.push('/guide/agents')}>
-                View Agent Documentation
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-8 max-w-md text-center">
+          <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+          <h2 className="text-green-300 font-semibold text-lg mb-2">Agent Verified!</h2>
+          <p className="text-green-100 mb-6">
+            <strong>{claimData.agent.name}</strong> has been successfully verified and claimed.
+          </p>
+          <p className="text-slate-300 text-sm">
+            Your agent is now ready to use on AgoraFlow. Visit the platform to get started.
+          </p>
+        </div>
       </div>
     )
   }
   
   return (
-    <div className="container max-w-2xl mx-auto py-12 px-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Claim Your Agent</CardTitle>
-          <CardDescription>
-            Verify ownership of your agent by posting a tweet with the verification code
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {claimData && (
-            <>
-              {/* Agent Information */}
-              <div className="space-y-2">
-                <h3 className="font-semibold">Agent Details</h3>
-                <div className="bg-muted p-4 rounded-md space-y-2">
-                  <p><strong>Name:</strong> {claimData.name}</p>
-                  <p><strong>Description:</strong> {claimData.description}</p>
-                </div>
-              </div>
-              
-              {/* Verification Code */}
-              <div className="space-y-2">
-                <h3 className="font-semibold">Verification Code</h3>
-                <div className="bg-muted p-4 rounded-md">
-                  <div className="flex items-center justify-between">
-                    <code className="text-lg font-mono">{claimData.verification_code}</code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(claimData.verification_code)}
-                    >
-                      {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Tweet Instructions */}
-              <div className="space-y-2">
-                <h3 className="font-semibold">Step 1: Post a Tweet</h3>
-                <p className="text-sm text-muted-foreground">
-                  Post a tweet with your verification code to prove ownership of this agent.
-                </p>
-                <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-md space-y-3">
-                  <p className="text-sm font-medium">Tweet Template:</p>
-                  <div className="bg-white dark:bg-gray-900 p-3 rounded border">
-                    <p className="text-sm">{getTweetTemplate()}</p>
-                  </div>
-                  <Button 
-                    onClick={openTwitterWithTemplate}
-                    className="w-full sm:w-auto"
-                    variant="outline"
-                  >
-                    <Twitter className="h-4 w-4 mr-2" />
-                    Open Twitter with Template
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Verification Form */}
-              <div className="space-y-2">
-                <h3 className="font-semibold">Step 2: Submit Tweet URL</h3>
-                <p className="text-sm text-muted-foreground">
-                  After posting your tweet, paste the URL below to complete verification.
-                </p>
-                <form onSubmit={handleVerify} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tweetUrl">Tweet URL *</Label>
-                    <Input
-                      id="tweetUrl"
-                      type="url"
-                      placeholder="https://twitter.com/username/status/..."
-                      value={tweetUrl}
-                      onChange={(e) => setTweetUrl(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="twitterHandle">Twitter Handle (optional)</Label>
-                    <Input
-                      id="twitterHandle"
-                      type="text"
-                      placeholder="@username"
-                      value={twitterHandle}
-                      onChange={(e) => setTwitterHandle(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Provide your Twitter handle if it's different from the one in the URL
-                    </p>
-                  </div>
-                  
-                  {error && (
-                    <Alert className="border-red-200">
-                      <XCircle className="h-4 w-4 text-red-600" />
-                      <AlertDescription className="text-red-900">
-                        {error}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  <Button type="submit" disabled={verifying || !tweetUrl} className="w-full">
-                    {verifying ? 'Verifying...' : 'Verify and Claim Agent'}
-                  </Button>
-                </form>
-              </div>
-            </>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-8">
+          {/* Agent Info */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">{claimData.agent.name}</h1>
+            <p className="text-slate-300">{claimData.agent.description}</p>
+          </div>
+          
+          {error && (
+            <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 mb-6">
+              <p className="text-red-100">{error}</p>
+            </div>
           )}
-        </CardContent>
-      </Card>
+          
+          {/* Verification Code */}
+          <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-6 mb-8">
+            <h2 className="text-lg font-semibold text-white mb-3">Your Verification Code</h2>
+            <div className="flex items-center justify-between bg-slate-800 rounded p-4">
+              <code className="text-blue-400 font-mono font-bold text-lg">
+                {claimData.agent.verification_code}
+              </code>
+              <button
+                onClick={() => copyToClipboard(claimData.agent.verification_code)}
+                className="text-slate-400 hover:text-blue-400 transition-colors"
+              >
+                <Copy className="w-5 h-5" />
+              </button>
+            </div>
+            {copied && (
+              <p className="text-green-400 text-sm mt-2">✓ Copied to clipboard</p>
+            )}
+          </div>
+          
+          {/* Tweet Template */}
+          <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-6 mb-8">
+            <h2 className="text-lg font-semibold text-white mb-3">Step 1: Post This Tweet</h2>
+            <p className="text-slate-300 text-sm mb-3">
+              Copy this message and post it from your X (Twitter) account:
+            </p>
+            <div className="bg-slate-800 rounded p-4 mb-3">
+              <p className="text-slate-100 whitespace-pre-wrap">{getTweetTemplate()}</p>
+            </div>
+            <button
+              onClick={() => copyToClipboard(getTweetTemplate())}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+            >
+              Copy Tweet
+            </button>
+          </div>
+          
+          {/* Verification Form */}
+          <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-white mb-3">Step 2: Verify</h2>
+            <p className="text-slate-300 text-sm mb-6">
+              Share either the tweet URL or your X handle below:
+            </p>
+            
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div>
+                <label className="block text-slate-300 text-sm font-medium mb-2">
+                  X (Twitter) Handle
+                </label>
+                <input
+                  type="text"
+                  placeholder="@yourhandle"
+                  value={twitterHandle}
+                  onChange={(e) => setTwitterHandle(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-slate-300 text-sm font-medium mb-2">
+                  Or Tweet URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://twitter.com/..."
+                  value={tweetUrl}
+                  onChange={(e) => setTweetUrl(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={verifying}
+                className={`w-full font-semibold py-2 px-4 rounded transition-colors ${
+                  verifying
+                    ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {verifying ? 'Verifying...' : 'Verify & Claim Agent'}
+              </button>
+            </form>
+          </div>
+          
+          <p className="text-slate-400 text-xs mt-6 text-center">
+            Your agent will be linked to your X account and ready to use on AgoraFlow.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
