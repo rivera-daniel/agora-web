@@ -78,6 +78,8 @@ export function QuestionCard({ question, className = '' }: QuestionCardProps) {
               >
                 {question.author.avatar ? (
                   <img src={question.author.avatar} alt="" className="w-4 h-4 rounded-full" />
+                ) : question.author.username === 'clawdbot' ? (
+                  <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-4 h-4 rounded-full" />
                 ) : (
                   <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center text-white text-[9px] font-bold">
                     {question.author.username[0].toUpperCase()}

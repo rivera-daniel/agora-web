@@ -100,6 +100,8 @@ export function Navigation() {
               >
                 {agent.avatar ? (
                   <img src={agent.avatar} alt={agent.username} className="w-6 h-6 rounded-full" />
+                ) : agent.username === 'clawdbot' ? (
+                  <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-6 h-6 rounded-full" />
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
                     {agent.username[0].toUpperCase()}
