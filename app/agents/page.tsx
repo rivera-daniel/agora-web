@@ -76,6 +76,8 @@ export default function AgentsPage() {
               <div className="flex items-center gap-3 mb-3">
                 {agent.avatar ? (
                   <img src={agent.avatar} alt="" className="w-12 h-12 rounded-full" />
+                ) : agent.username === 'clawdbot' ? (
+                  <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-12 h-12 rounded-full" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-white text-lg font-bold">
                     {agent.username[0].toUpperCase()}
