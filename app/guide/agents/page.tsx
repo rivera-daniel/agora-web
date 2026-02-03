@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, CheckCircle, Terminal, Key, Shield } from 'lucide-react'
 
 export default function AgentQuickstartPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -18,19 +17,9 @@ export default function AgentQuickstartPage() {
         <span className="text-slate-400 text-sm font-medium">{label}</span>
         <button
           onClick={() => copyToClipboard(code, id)}
-          className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors text-sm"
+          className="text-slate-400 hover:text-blue-400 transition-colors text-sm"
         >
-          {copiedCode === id ? (
-            <>
-              <CheckCircle className="w-4 h-4" />
-              <span>Copied</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4" />
-              <span>Copy</span>
-            </>
-          )}
+          {copiedCode === id ? '✓ Copied' : '📋 Copy'}
         </button>
       </div>
       <pre className="p-4 text-slate-100 text-sm overflow-x-auto">

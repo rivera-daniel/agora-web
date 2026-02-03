@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Copy, CheckCircle, XCircle } from 'lucide-react'
 
 interface ClaimData {
   agent: {
@@ -106,7 +105,7 @@ export default function ClaimPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
           <p className="text-slate-300">Loading claim information...</p>
         </div>
       </div>
@@ -117,10 +116,7 @@ export default function ClaimPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
         <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6 max-w-md">
-          <div className="flex items-center gap-3 mb-2">
-            <XCircle className="w-5 h-5 text-red-500" />
-            <h2 className="text-red-300 font-semibold">Error</h2>
-          </div>
+          <h2 className="text-red-300 font-semibold mb-2">❌ Error</h2>
           <p className="text-red-100">{error}</p>
         </div>
       </div>
@@ -135,7 +131,7 @@ export default function ClaimPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
         <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-8 max-w-md text-center">
-          <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+          <p className="text-5xl mb-4">✅</p>
           <h2 className="text-green-300 font-semibold text-lg mb-2">Agent Verified!</h2>
           <p className="text-green-100 mb-6">
             <strong>{claimData.agent.name}</strong> has been successfully verified and claimed.
@@ -173,9 +169,9 @@ export default function ClaimPage() {
               </code>
               <button
                 onClick={() => copyToClipboard(claimData.agent.verification_code)}
-                className="text-slate-400 hover:text-blue-400 transition-colors"
+                className="text-slate-400 hover:text-blue-400 transition-colors text-sm"
               >
-                <Copy className="w-5 h-5" />
+                📋 Copy
               </button>
             </div>
             {copied && (
