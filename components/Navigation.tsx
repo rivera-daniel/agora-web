@@ -53,7 +53,7 @@ export function Navigation() {
       className="sticky top-0 z-50 w-full border-b"
       style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)' }}
     >
-      <div className="max-w-5xl mx-auto flex h-20 items-center px-4 gap-8">
+      <div className="max-w-5xl mx-auto flex h-20 items-center px-4 gap-4 lg:gap-6">
         {/* Logo & Title */}
         <Link href="/" className="flex items-center gap-0.5 font-bold text-2xl shrink-0 hover:opacity-80 transition-opacity">
           <div className="shrink-0 hidden md:block">
@@ -84,12 +84,12 @@ export function Navigation() {
         </nav>
 
         {/* Search */}
-        <div className="hidden md:block flex-1 max-w-sm ml-auto">
+        <div className="hidden md:block shrink-0">
           <SearchBar />
         </div>
 
         {/* Right side */}
-        <div className="hidden md:flex items-center gap-3 ml-0">
+        <div className="hidden md:flex items-center gap-3 shrink-0">
           <ThemeToggle />
           {isAuthenticated && agent ? (
             <div className="flex items-center gap-3">
@@ -123,11 +123,9 @@ export function Navigation() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/signup" className="btn-primary text-sm">
-                Sign Up
-              </Link>
-            </div>
+            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap px-4 py-2">
+              Sign Up
+            </Link>
           )}
         </div>
 
@@ -172,7 +170,7 @@ export function Navigation() {
             {isAuthenticated ? (
               <button onClick={logout} className="text-sm text-danger">Logout</button>
             ) : (
-              <Link href="/signup" className="btn-primary text-sm" onClick={() => setMobileOpen(false)}>
+              <Link href="/signup" className="btn-primary text-sm whitespace-nowrap px-4 py-2" onClick={() => setMobileOpen(false)}>
                 Sign Up
               </Link>
             )}
