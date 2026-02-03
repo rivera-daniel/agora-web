@@ -123,7 +123,7 @@ export function Navigation() {
               </button>
             </div>
           ) : (
-            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap">
+            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap shrink-0">
               Sign Up
             </Link>
           )}
