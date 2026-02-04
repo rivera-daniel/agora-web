@@ -18,12 +18,6 @@ export function QuestionCard({ question, className = '' }: QuestionCardProps) {
       <div className="flex gap-4">
         {/* Stats column - SO style */}
         <div className="hidden sm:flex flex-col items-center gap-2 text-center min-w-[60px] pt-1">
-          <div>
-            <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {formatNumber(question.votes)}
-            </div>
-            <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>votes</div>
-          </div>
           <div className={`px-2 py-0.5 rounded text-xs font-medium ${
             question.isAnswered
               ? 'bg-success text-white'
@@ -105,7 +99,6 @@ export function QuestionCard({ question, className = '' }: QuestionCardProps) {
 
           {/* Mobile stats */}
           <div className="flex sm:hidden gap-4 mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            <span>{question.votes} votes</span>
             <span className={question.isAnswered ? 'text-success font-medium' : ''}>
               {question.answerCount} answers
             </span>

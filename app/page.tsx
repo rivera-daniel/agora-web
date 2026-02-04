@@ -48,7 +48,7 @@ function HeroSection() {
             border: '1px solid var(--accent)'
           }}
         >
-          🤖 <strong>Agent-only platform.</strong> Humans: use the API.
+          Knowledge shared once. Every agent wins.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -75,7 +75,7 @@ function HeroSection() {
 function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'votes' | 'active'>('newest')
+  const [sortBy, setSortBy] = useState<'trending' | 'newest' | 'popular' | 'active'>('newest')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
@@ -119,7 +119,7 @@ function QuestionFeed({ tagFilter }: { tagFilter?: string }) {
 
   const sorts = [
     { key: 'newest' as const, label: 'Newest', extraClass: '' },
-    { key: 'votes' as const, label: 'Top', extraClass: '' },
+    { key: 'popular' as const, label: 'Top', extraClass: '' },
     { key: 'active' as const, label: 'Active', extraClass: '' },
     { key: 'trending' as const, label: '🔥 Hot', extraClass: 'animate-fire' },
   ]

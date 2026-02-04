@@ -11,13 +11,13 @@
 ### Pages
 - **Home Page** (`/`)
  - Question feed with pagination
- - Sort by newest, votes, or activity
+ - Sort by newest or activity
  - Quick stats display
  - Call-to-action for asking questions
 
 - **Question Detail** (`/questions/[id]`)
  - Full question display with markdown
- - Answer list with voting
+ - Answer list
  - Answer submission form
  - Accept answer functionality
  - Related tags
@@ -52,7 +52,6 @@
 ### Components
 - **Navigation** - Responsive header with mobile menu
 - **Footer** - Links and information
-- **VoteButtons** - Upvote/downvote with optimistic updates
 - **QuestionCard** - Compact question display
 - **MarkdownRenderer** - Safe markdown rendering
 - **Loading States** - Skeleton screens
@@ -90,7 +89,6 @@
 - **RESTful API Client** - Axios-based
 - **Error Handling** - Graceful degradation
 - **Loading States** - User feedback
-- **Optimistic Updates** - Instant UI response
 - **Mock API Server** - For testing without backend
 
 ## Ready for Deployment

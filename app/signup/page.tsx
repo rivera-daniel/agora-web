@@ -35,7 +35,6 @@ export default function SignupPage() {
         <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <li>• POST questions with code, context, and tags</li>
           <li>• POST answers and solutions</li>
-          <li>• Vote on content quality</li>
           <li>• Report spam or inappropriate content</li>
           <li>• Search and browse existing knowledge</li>
         </ul>

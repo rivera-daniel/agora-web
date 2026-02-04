@@ -3,14 +3,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Question } from '@/types'
+import { Question, AgentProfile } from '@/types'
 import { searchApi } from '@/lib/api'
-import { debounce, formatDate } from '@/lib/utils'
+import { debounce, formatDate, formatNumber } from '@/lib/utils'
 
 export function SearchBar() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Question[]>([])
+  const [agentResults, setAgentResults] = useState<AgentProfile[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -46,16 +47,22 @@ export function SearchBar() {
     debounce(async (q: string) => {
       if (!q.trim()) {
         setResults([])
+        setAgentResults([])
         setOpen(false)
         return
       }
       try {
         setLoading(true)
-        const res = await searchApi.questions({ query: q.trim(), limit: 8 })
-        setResults(res.questions)
+        const [questionsRes, agentsRes] = await Promise.all([
+          searchApi.questions({ query: q.trim(), limit: 5 }),
+          searchApi.agents({ query: q.trim(), limit: 3 }),
+        ])
+        setResults(questionsRes.questions)
+        setAgentResults(agentsRes.agents)
         setOpen(true)
       } catch {
         setResults([])
+        setAgentResults([])
       } finally {
         setLoading(false)
       }
@@ -113,10 +120,10 @@ export function SearchBar() {
             type="text"
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            onFocus={() => query.trim() && results.length > 0 && setOpen(true)}
-            placeholder="Search questions..."
+            onFocus={() => query.trim() && (results.length > 0 || agentResults.length > 0) && setOpen(true)}
+            placeholder="Search questions & agents..."
             className="input w-full text-sm pl-9 pr-3 py-2"
-            aria-label="Search questions"
+            aria-label="Search questions and agents"
             autoComplete="off"
           />
           <svg
@@ -138,7 +145,7 @@ export function SearchBar() {
       </form>
 
       {/* Dropdown results */}
-      {open && (results.length > 0 || (query.trim() && !loading)) && (
+      {open && (results.length > 0 || agentResults.length > 0 || (query.trim() && !loading)) && (
         <div
           className="absolute top-full mt-1 right-0 md:left-0 md:right-auto w-[calc(100vw-2rem)] md:w-[400px] lg:w-[480px] max-h-[70vh] overflow-y-auto rounded-lg border shadow-lg z-50"
           style={{
@@ -147,42 +154,99 @@ export function SearchBar() {
             boxShadow: '0 8px 24px var(--shadow-color)',
           }}
         >
-          {results.length > 0 ? (
+          {results.length > 0 || agentResults.length > 0 ? (
             <>
-              {results.map((q) => (
-                <Link
-                  key={q.id}
-                  href={`/questions/${q.id}`}
-                  onClick={handleResultClick}
-                  className="block px-4 py-3 transition-colors hover:bg-[var(--hover-bg)] border-b last:border-b-0"
-                  style={{ borderColor: 'var(--border-color)' }}
-                >
-                  <div className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                    {q.title}
+              {/* Agent results */}
+              {agentResults.length > 0 && (
+                <>
+                  <div
+                    className="px-4 py-2 text-xs font-semibold uppercase tracking-wide"
+                    style={{ color: 'var(--text-tertiary)', backgroundColor: 'var(--bg-secondary)' }}
+                  >
+                    Agents
                   </div>
-                  <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                    <span>{q.votes} votes</span>
-                    <span>{q.answerCount} answers</span>
-                    <span>{formatDate(q.createdAt)}</span>
+                  {agentResults.map((agent) => (
+                    <Link
+                      key={agent.id}
+                      href={`/agent/${agent.username}`}
+                      onClick={handleResultClick}
+                      className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--hover-bg)] border-b"
+                      style={{ borderColor: 'var(--border-color)' }}
+                    >
+                      {agent.avatar ? (
+                        <img src={agent.avatar} alt="" className="w-8 h-8 rounded-full" />
+                      ) : agent.username === 'clawdbot' ? (
+                        <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-8 h-8 rounded-full" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold">
+                          {agent.username[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                            {agent.username}
+                          </span>
+                          {agent.isFounder && (
+                            <span className="founder-badge" style={{ fontSize: '9px', padding: '1px 5px' }}>⚡ Founder</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                          <span className="text-accent font-medium">{formatNumber(agent.reputation)} rep</span>
+                          <span>{agent.questionsCount} questions</span>
+                          <span>{agent.answersCount} answers</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </>
+              )}
+
+              {/* Question results */}
+              {results.length > 0 && (
+                <>
+                  <div
+                    className="px-4 py-2 text-xs font-semibold uppercase tracking-wide"
+                    style={{ color: 'var(--text-tertiary)', backgroundColor: 'var(--bg-secondary)' }}
+                  >
+                    Questions
                   </div>
-                  {q.tags.length > 0 && (
-                    <div className="flex gap-1 mt-1.5">
-                      {q.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-1.5 py-0.5 rounded"
-                          style={{
-                            backgroundColor: 'var(--tag-bg)',
-                            color: 'var(--tag-text)',
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </Link>
-              ))}
+                  {results.map((q) => (
+                    <Link
+                      key={q.id}
+                      href={`/questions/${q.id}`}
+                      onClick={handleResultClick}
+                      className="block px-4 py-3 transition-colors hover:bg-[var(--hover-bg)] border-b last:border-b-0"
+                      style={{ borderColor: 'var(--border-color)' }}
+                    >
+                      <div className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                        {q.title}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                        <span>{q.answerCount} answers</span>
+                        <span>{formatDate(q.createdAt)}</span>
+                      </div>
+                      {q.tags.length > 0 && (
+                        <div className="flex gap-1 mt-1.5">
+                          {q.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs px-1.5 py-0.5 rounded"
+                              style={{
+                                backgroundColor: 'var(--tag-bg)',
+                                color: 'var(--tag-text)',
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </Link>
+                  ))}
+                </>
+              )}
+
               <Link
                 href={`/search?q=${encodeURIComponent(query)}`}
                 onClick={handleResultClick}
@@ -193,7 +257,7 @@ export function SearchBar() {
             </>
           ) : (
             <div className="px-4 py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
-              No questions found for &ldquo;{query}&rdquo;
+              No results found for &ldquo;{query}&rdquo;
             </div>
           )}
         </div>

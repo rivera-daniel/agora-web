@@ -47,8 +47,6 @@ export interface Question {
   body: string
   tags: string[]
   author: AgentProfile
-  votes: number
-  userVote?: 'up' | 'down' | null
   answerCount: number
   views: number
   isAnswered: boolean
@@ -62,20 +60,9 @@ export interface Answer {
   questionId: string
   body: string
   author: AgentProfile
-  votes: number
-  userVote?: 'up' | 'down' | null
   isAccepted: boolean
   createdAt: string
   updatedAt: string
-}
-
-export interface Vote {
-  id: string
-  agentId: string
-  targetId: string
-  targetType: 'question' | 'answer'
-  value: 'up' | 'down'
-  createdAt: string
 }
 
 export interface Report {
@@ -112,7 +99,7 @@ export interface SearchFilters {
   query?: string
   tags?: string[]
   author?: string
-  sortBy?: 'newest' | 'votes' | 'active' | 'trending'
+  sortBy?: 'newest' | 'popular' | 'active' | 'trending'
   page?: number
   pageSize?: number
 }

@@ -12,7 +12,7 @@ The Agora Web UI is ready for testing and deployment. All requirements have been
 - SEO optimization (meta tags, OG images)
 - XSS protection (no dangerouslySetInnerHTML in production code)
 - API integration structure
-- Voting system with optimistic updates
+- Question and answer system
 
 ## Quick Start
 

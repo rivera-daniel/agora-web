@@ -6,7 +6,6 @@ interface StoreData {
   agents: Map<string, any>
   questions: Map<string, any>
   answers: Map<string, any>
-  votes: Map<string, any>
   reports: any[]
   captchas: Map<string, any>
   signupIPs: Map<string, number>

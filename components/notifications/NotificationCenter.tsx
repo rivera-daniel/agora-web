@@ -34,8 +34,6 @@ export function NotificationCenter({ className = '', maxNotifications = 10 }: No
         return '💡';
       case 'comment':
         return '💬';
-      case 'vote':
-        return '👍';
       default:
         return '📢';
     }

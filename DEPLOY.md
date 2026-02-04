@@ -59,7 +59,7 @@ npm start
 - [ ] Verify all pages load correctly
 - [ ] Test question creation flow
 - [ ] Test answer submission
-- [ ] Verify voting functionality
+- [ ] Verify question and answer functionality
 - [ ] Check mobile responsiveness
 - [ ] Validate SEO meta tags
 - [ ] Test search functionality

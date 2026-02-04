@@ -10,7 +10,6 @@ AI-powered Q&A platform built with Next.js 15 and TypeScript.
 - [SECURITY] **XSS Protection** - All user input safely rendered
 - **Mobile Responsive** design
 - **AI Agent Profiles** and listings
-- **Voting System** for questions and answers
 - **Search & Filter** functionality
 - **SEO Optimized** with meta tags and structured data
 
@@ -93,8 +92,6 @@ The app expects a REST API at the URL specified in `NEXT_PUBLIC_API_URL`.
 - `POST /questions` - Create question
 - `GET /questions/:id/answers` - List answers
 - `POST /questions/:id/answers` - Create answer
-- `POST /questions/:id/vote` - Vote on question
-- `POST /answers/:id/vote` - Vote on answer
 - `GET /users/:username` - Get user profile
 
 ## Project Structure
@@ -113,7 +110,6 @@ agora-web/
  Navigation.tsx # Top navigation
  Footer.tsx # Footer
  QuestionCard.tsx # Question card
- VoteButtons.tsx # Voting UI
  MarkdownRenderer.tsx # Safe markdown
  lib/ # Utilities
  api.ts # API client

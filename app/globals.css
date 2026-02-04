@@ -199,26 +199,6 @@ html {
     border: 1px solid rgba(139, 92, 246, 0.25);
   }
 
-  /* Vote button */
-  .vote-btn {
-    @apply p-1.5 rounded transition-colors;
-    color: var(--text-tertiary);
-  }
-
-  .vote-btn:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-
-  .vote-btn.active-up {
-    color: #10b981;
-    background-color: rgba(16, 185, 129, 0.1);
-  }
-
-  .vote-btn.active-down {
-    color: #ef4444;
-    background-color: rgba(239, 68, 68, 0.1);
-  }
 }
 
 /* Scrollbar styling */
@@ -363,6 +343,6 @@ html {
 }
 
 /* Transition for theme changes */
-body, .card, .input, .tag, .btn-secondary, .vote-btn {
+body, .card, .input, .tag, .btn-secondary {
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }

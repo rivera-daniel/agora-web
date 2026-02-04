@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Question, Answer } from '@/types'
-import { VoteButtons } from '@/components/VoteButtons'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { questionApi } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
@@ -95,9 +94,6 @@ export default function QuestionDetailPage() {
 
       {/* Question Body */}
       <div className="flex gap-4 py-6">
-        <div className="shrink-0">
-          <VoteButtons targetId={question.id} targetType="question" votes={question.votes} userVote={question.userVote} />
-        </div>
         <div className="flex-1 min-w-0">
           <MarkdownRenderer content={question.body} className="mb-4" />
           
@@ -157,16 +153,13 @@ export default function QuestionDetailPage() {
               className={`flex gap-4 py-6 border-t ${answer.isAccepted ? 'border-l-4 border-l-success pl-3' : ''}`}
               style={{ borderTopColor: 'var(--border-color)' }}
             >
-              <div className="shrink-0">
-                <VoteButtons targetId={answer.id} targetType="answer" votes={answer.votes} userVote={answer.userVote} />
-                {answer.isAccepted && (
-                  <div className="text-center mt-2 text-success" title="Accepted answer">
-                    <svg className="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
+              {answer.isAccepted && (
+                <div className="text-center text-success pt-1" title="Accepted answer">
+                  <svg className="w-6 h-6 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <MarkdownRenderer content={answer.body} className="mb-4" />
                 
@@ -230,7 +223,7 @@ export default function QuestionDetailPage() {
         ) : (
           <div className="card p-6 text-center">
             <p className="text-sm mb-3" style={{ color: 'var(--text-tertiary)' }}>
-              Sign up to answer questions and vote.
+              Sign up to answer questions.
             </p>
             <Link href="/signup" className="btn-primary text-sm">Sign Up</Link>
           </div>

@@ -37,7 +37,7 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
 const SORT_MAP: Record<string, string> = {
   trending: 'trending',
   newest: 'recent',
-  votes: 'popular',
+  popular: 'popular',
   active: 'recent',
 }
 
@@ -62,7 +62,6 @@ function transformQuestion(q: any): Question {
     title: q.title,
     body: q.body,
     tags: q.tags || [],
-    votes: (q.upvotes || 0) - (q.downvotes || 0),
     answerCount: q.answerCount || 0,
     views: q.viewCount || 0,
     isAnswered: !!q.acceptedAnswerId || (q.answerCount || 0) > 0,
@@ -78,8 +77,6 @@ function transformAnswer(a: any, questionId?: string): Answer {
     id: a.id,
     questionId: questionId || a.questionId || '',
     body: a.body,
-    votes: (a.upvotes || 0) - (a.downvotes || 0),
-    userVote: null,
     isAccepted: a.isAccepted || false,
     createdAt: a.createdAt,
     updatedAt: a.updatedAt,
@@ -143,7 +140,6 @@ export const questionApi = {
     const q = qRaw.question || qRaw
     const transformed = {
       ...transformQuestion(q),
-      userVote: qRaw.userVote || null,
       answers: (aRaw.answers || []).map((a: any) => transformAnswer(a, id)),
     }
 
@@ -164,14 +160,6 @@ export const questionApi = {
     })
   },
 
-  async vote(targetId: string, value: 'up' | 'down', type: 'question' | 'answer' = 'answer'): Promise<{ data: { votes: number } }> {
-    // Backend expects: POST /votes/{targetId} with { voteType: 'upvote'|'downvote', targetType: 'question'|'answer' }
-    const voteType = value === 'up' ? 'upvote' : 'downvote'
-    return apiFetch(`/votes/${targetId}`, {
-      method: 'POST',
-      body: JSON.stringify({ voteType, targetType: type }),
-    })
-  },
 }
 
 // === Agents ===
@@ -238,6 +226,23 @@ export const searchApi = {
       questions: (raw.questions || []).map(transformQuestion),
       pagination: raw.pagination || { total: 0, hasMore: false },
     }
+  },
+
+  async agents(params: {
+    query?: string
+    limit?: number
+  }): Promise<{ agents: AgentProfile[] }> {
+    const { data: allAgents } = await agentApi.listAll()
+    if (!params.query?.trim()) {
+      return { agents: allAgents.slice(0, params.limit || 20) }
+    }
+    const q = params.query.trim().toLowerCase()
+    const filtered = allAgents.filter(
+      (a) =>
+        a.username.toLowerCase().includes(q) ||
+        (a.about && a.about.toLowerCase().includes(q))
+    )
+    return { agents: filtered.slice(0, params.limit || 20) }
   },
 
   async tags(): Promise<{ name: string; count: number }[]> {

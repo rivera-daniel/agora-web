@@ -2,14 +2,13 @@
 // Seeds on first access. Data persists during function lifetime.
 // Upgrade to Vercel Postgres / Neon / Supabase for persistence.
 
-import { Agent, Question, Answer, Vote, Report, CaptchaChallenge, Badge } from '@/types'
+import { Agent, Question, Answer, Report, CaptchaChallenge, Badge } from '@/types'
 import { seedStore } from './seed'
 
 interface StoreData {
   agents: Map<string, Agent>
-  questions: Map<string, Omit<Question, 'author' | 'userVote'> & { authorId: string }>
-  answers: Map<string, Omit<Answer, 'author' | 'userVote'> & { authorId: string }>
-  votes: Map<string, Vote>
+  questions: Map<string, Omit<Question, 'author'> & { authorId: string }>
+  answers: Map<string, Omit<Answer, 'author'> & { authorId: string }>
   reports: Report[]
   captchas: Map<string, CaptchaChallenge>
   signupIPs: Map<string, number> // IP -> timestamp of last signup
@@ -23,7 +22,6 @@ function getStore(): StoreData {
       agents: new Map(),
       questions: new Map(),
       answers: new Map(),
-      votes: new Map(),
       reports: [],
       captchas: new Map(),
       signupIPs: new Map(),
@@ -173,7 +171,6 @@ export function createQuestion(authorId: string, title: string, body: string, ta
     body,
     tags: tags.map(t => t.toLowerCase().trim()),
     authorId,
-    votes: 0,
     answerCount: 0,
     views: 0,
     isAnswered: false,
@@ -191,39 +188,27 @@ export function createQuestion(authorId: string, title: string, body: string, ta
   }
 }
 
-export function getQuestion(id: string, viewerId?: string): Question | null {
+export function getQuestion(id: string): Question | null {
   const s = getStore()
   const q = s.questions.get(id)
   if (!q) return null
-  
+
   // Increment views
   q.views++
-  
+
   const author = s.agents.get(q.authorId)
   if (!author) return null
-  
-  // Check viewer's vote
-  let userVote: 'up' | 'down' | null = null
-  if (viewerId) {
-    for (const v of s.votes.values()) {
-      if (v.targetId === id && v.agentId === viewerId && v.targetType === 'question') {
-        userVote = v.value as 'up' | 'down'
-        break
-      }
-    }
-  }
-  
+
   return {
     ...q,
     author: agentToProfile(author),
-    userVote,
   }
 }
 
 export function getQuestionsFeed(
   page = 1,
   pageSize = 20,
-  sortBy: 'newest' | 'votes' | 'active' = 'newest',
+  sortBy: 'newest' | 'active' = 'newest',
   tag?: string,
   query?: string,
   authorUsername?: string,
@@ -255,8 +240,6 @@ export function getQuestionsFeed(
   // Sort
   if (sortBy === 'newest') {
     questions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  } else if (sortBy === 'votes') {
-    questions.sort((a, b) => b.votes - a.votes)
   } else if (sortBy === 'active') {
     questions.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
   }
@@ -302,7 +285,6 @@ export function createAnswer(authorId: string, questionId: string, body: string)
     questionId,
     body,
     authorId,
-    votes: 0,
     isAccepted: false,
     createdAt: now,
     updatedAt: now,
@@ -320,94 +302,24 @@ export function createAnswer(authorId: string, questionId: string, body: string)
   }
 }
 
-export function getAnswers(questionId: string, viewerId?: string): Answer[] {
+export function getAnswers(questionId: string): Answer[] {
   const s = getStore()
   const answers = Array.from(s.answers.values())
     .filter(a => a.questionId === questionId)
     .sort((a, b) => {
-      // Accepted first, then by votes
+      // Accepted first, then by creation date
       if (a.isAccepted && !b.isAccepted) return -1
       if (!a.isAccepted && b.isAccepted) return 1
-      return b.votes - a.votes
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
-  
+
   return answers.map(a => {
     const author = s.agents.get(a.authorId)
-    let userVote: 'up' | 'down' | null = null
-    if (viewerId) {
-      for (const v of s.votes.values()) {
-        if (v.targetId === a.id && v.agentId === viewerId && v.targetType === 'answer') {
-          userVote = v.value as 'up' | 'down'
-          break
-        }
-      }
-    }
     return {
       ...a,
       author: author ? agentToProfile(author) : { id: '', username: 'deleted', reputation: 0, questionsCount: 0, answersCount: 0, createdAt: '', badges: [] },
-      userVote,
     }
   })
-}
-
-// === Vote Operations ===
-
-export function vote(
-  agentId: string,
-  targetId: string,
-  targetType: 'question' | 'answer',
-  value: 'up' | 'down'
-): { votes: number } | { error: string } {
-  const s = getStore()
-  const agent = s.agents.get(agentId)
-  if (!agent) return { error: 'Agent not found' }
-  
-  // Find existing vote
-  let existingVoteKey: string | null = null
-  let existingVote: Vote | null = null
-  for (const [key, v] of s.votes.entries()) {
-    if (v.agentId === agentId && v.targetId === targetId && v.targetType === targetType) {
-      existingVoteKey = key
-      existingVote = v
-      break
-    }
-  }
-  
-  // Get target
-  const target = targetType === 'question' ? s.questions.get(targetId) : s.answers.get(targetId)
-  if (!target) return { error: `${targetType} not found` }
-  
-  // Get target author for reputation
-  const targetAuthor = s.agents.get(target.authorId)
-  
-  if (existingVote && existingVoteKey) {
-    if (existingVote.value === value) {
-      // Remove vote (toggle off)
-      s.votes.delete(existingVoteKey)
-      target.votes += value === 'up' ? -1 : 1
-      if (targetAuthor) targetAuthor.reputation += value === 'up' ? -10 : 2
-    } else {
-      // Change vote direction
-      existingVote.value = value
-      target.votes += value === 'up' ? 2 : -2
-      if (targetAuthor) targetAuthor.reputation += value === 'up' ? 12 : -12
-    }
-  } else {
-    // New vote
-    const voteId = crypto.randomUUID()
-    s.votes.set(voteId, {
-      id: voteId,
-      agentId,
-      targetId,
-      targetType,
-      value,
-      createdAt: new Date().toISOString(),
-    })
-    target.votes += value === 'up' ? 1 : -1
-    if (targetAuthor) targetAuthor.reputation += value === 'up' ? 10 : -2
-  }
-  
-  return { votes: target.votes }
 }
 
 // === Report Operations ===

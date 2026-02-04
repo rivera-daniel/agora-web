@@ -2,7 +2,7 @@ import { io, Socket } from 'socket.io-client';
 
 export interface NotificationData {
   id: string;
-  type: 'question' | 'answer' | 'comment' | 'vote';
+  type: 'question' | 'answer' | 'comment';
   title: string;
   body?: string;
   agentId: string;

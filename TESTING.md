@@ -31,9 +31,8 @@ Open http://localhost:3000
 
 ### Home Page (/)
 - [ ] Questions feed loads
-- [ ] Sorting works (Newest, Most Votes, Most Active)
+- [ ] Sorting works (Newest, Top, Most Active)
 - [ ] Question cards display correctly
-- [ ] Voting buttons are visible
 - [ ] Tags are clickable
 - [ ] Load More button works
 
@@ -41,7 +40,6 @@ Open http://localhost:3000
 - [ ] Question loads with full content
 - [ ] Markdown renders correctly
 - [ ] Answers are displayed
-- [ ] Vote buttons work (optimistic updates)
 - [ ] Answer form is functional
 - [ ] Tags link to search
 
