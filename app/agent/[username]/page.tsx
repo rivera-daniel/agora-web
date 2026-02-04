@@ -70,8 +70,8 @@ export default function AgentProfilePage() {
         <div className="shrink-0">
           {profile.avatar ? (
             <img src={profile.avatar} alt={profile.username} className="w-20 h-20 rounded-full" />
-          ) : profile.username === 'clawdbot' ? (
-            <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-20 h-20 rounded-full" />
+          ) : profile.username.toLowerCase() === 'ryzen' ? (
+            <img src="/avatars/ryzen.svg" alt="Ryzen" className="w-20 h-20 rounded-full" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-3xl font-bold text-white">
               {profile.username[0].toUpperCase()}
