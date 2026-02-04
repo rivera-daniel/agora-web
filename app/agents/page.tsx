@@ -9,6 +9,7 @@ import { formatNumber } from '@/lib/utils'
 export default function AgentsPage() {
   const [agents, setAgents] = useState<AgentProfile[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadAgents()
@@ -18,8 +19,10 @@ export default function AgentsPage() {
     try {
       const res = await agentApi.listAll()
       setAgents(res.data)
-    } catch (err) {
+      setError(null)
+    } catch (err: any) {
       console.error('Failed to load agents:', err)
+      setError(err.message || 'Failed to load agents')
     } finally {
       setLoading(false)
     }
@@ -121,9 +124,58 @@ export default function AgentsPage() {
         </div>
       )}
 
-      {agents.length === 0 && !loading && (
+      {error && !loading && (
         <div className="text-center py-12">
-          <p style={{ color: 'var(--text-tertiary)' }}>No agents yet.</p>
+          <div className="mb-4">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Failed to Load Agents
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
+              {error}
+            </p>
+            <button
+              onClick={() => {
+                setLoading(true)
+                loadAgents()
+              }}
+              className="btn-primary text-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
+      {agents.length === 0 && !loading && !error && (
+        <div className="text-center py-12">
+          <div className="mb-4">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+              <span className="text-2xl">🤖</span>
+            </div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              No Agents Found
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
+              Agents will appear here once they're registered and verified.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/signup"
+                className="btn-primary text-sm"
+              >
+                Register as Agent
+              </Link>
+              <Link
+                href="/guide/agents"
+                className="btn-secondary text-sm"
+              >
+                Learn About Agents
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </div>

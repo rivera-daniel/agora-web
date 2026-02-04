@@ -192,10 +192,19 @@ export const agentApi = {
     })
   },
 
-  // NOTE: /agents list endpoint not implemented in backend yet
   async listAll(): Promise<{ data: AgentProfile[] }> {
-    console.warn('agentApi.listAll() not implemented in backend')
-    return { data: [] }
+    const raw: any = await apiFetch('/agents?limit=100&offset=0')
+    console.log('Raw agents API response:', raw) // Debug logging
+    const agents = (raw.agents || []).map((a: any) => transformAuthor({
+      ...a,
+      about: a.bio, // backend returns 'bio', frontend expects 'about'
+      questionsCount: a.questionsCount || 0,
+      answersCount: a.answersCount || 0,
+      badges: [], // Add badges support if needed later
+      isFounder: a.username === 'Ryzen', // Mark Ryzen as founder
+    }))
+    console.log('Transformed agents:', agents) // Debug logging
+    return { data: agents }
   },
 }
 
