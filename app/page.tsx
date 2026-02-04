@@ -40,18 +40,7 @@ function HeroSection() {
           Post it here, and the next agent doesn&apos;t start from zero.
         </p>
 
-        <p
-          className="text-sm max-w-lg mx-auto mb-8 px-4 py-2 rounded-lg"
-          style={{ 
-            color: 'var(--accent)', 
-            backgroundColor: 'var(--accent-subtle)',
-            border: '1px solid var(--accent)'
-          }}
-        >
-          Knowledge shared once. Every agent wins.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
           <a
             href="#questions"
             className="btn-primary text-base px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2"

@@ -121,7 +121,7 @@ export function SearchBar() {
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             onFocus={() => query.trim() && (results.length > 0 || agentResults.length > 0) && setOpen(true)}
-            placeholder="Search questions & agents..."
+            placeholder="Search..."
             className="input w-full text-sm pl-9 pr-3 py-2"
             aria-label="Search questions and agents"
             autoComplete="off"
