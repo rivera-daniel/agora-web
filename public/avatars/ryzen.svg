@@ -1,84 +1,78 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <defs>
-    <!-- Brand gradient: blue → purple → amber -->
-    <linearGradient id="rg" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="50%" stop-color="#8b5cf6"/>
+    <!-- Sharp gradient: electric blue to amber -->
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9"/>
       <stop offset="100%" stop-color="#f59e0b"/>
     </linearGradient>
-    <!-- Darker version for depth -->
-    <linearGradient id="rg-dark" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0%" stop-color="#1e40af"/>
-      <stop offset="50%" stop-color="#6d28d9"/>
-      <stop offset="100%" stop-color="#d97706"/>
+    <!-- Dark gradient for depth -->
+    <linearGradient id="shadow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c4a6e"/>
+      <stop offset="100%" stop-color="#92400e"/>
     </linearGradient>
-    <!-- Subtle glow -->
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    <!-- Core glow -->
+    <radialGradient id="core" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
     </radialGradient>
-    <!-- Clip for circular avatar -->
-    <clipPath id="circle">
-      <circle cx="100" cy="100" r="96"/>
-    </clipPath>
   </defs>
 
-  <!-- Background -->
-  <circle cx="100" cy="100" r="100" fill="#0f0f13"/>
+  <!-- Background: pure black for sharp contrast -->
+  <circle cx="100" cy="100" r="100" fill="#000"/>
   
-  <!-- Subtle glow behind -->
-  <circle cx="100" cy="100" r="90" fill="url(#glow)"/>
+  <!-- Core energy field -->
+  <circle cx="100" cy="100" r="85" fill="url(#core)"/>
 
-  <g clip-path="url(#circle)">
-    <!-- Hexagonal frame (rotated for flat-top) -->
+  <!-- Main geometric form: angular diamond/rhombus representing decisiveness -->
+  <g transform="translate(100,100)">
+    
+    <!-- Outer sharp frame -->
     <polygon 
-      points="100,16 166,42 166,108 100,134 34,108 34,42" 
+      points="-60,0 0,-60 60,0 0,60" 
       fill="none" 
-      stroke="url(#rg)" 
-      stroke-width="2" 
-      opacity="0.3"
-      transform="translate(0, 20)"
+      stroke="url(#edge)" 
+      stroke-width="3" 
+      opacity="0.6"
     />
-
-    <!-- Inner geometric: three nodes connected — echoing the AgoraFlow logo -->
-    <!-- But arranged as a builder's constellation -->
     
-    <!-- Connection lines (circuit-like) -->
-    <line x1="100" y1="52" x2="62" y2="108" stroke="url(#rg)" stroke-width="1.5" opacity="0.4"/>
-    <line x1="100" y1="52" x2="138" y2="108" stroke="url(#rg)" stroke-width="1.5" opacity="0.4"/>
-    <line x1="62" y1="108" x2="138" y2="108" stroke="url(#rg)" stroke-width="1.5" opacity="0.4"/>
-    <!-- Vertical spine — the "builder's axis" -->
-    <line x1="100" y1="52" x2="100" y2="148" stroke="url(#rg)" stroke-width="1.5" opacity="0.3"/>
-    <!-- Side extensions -->
-    <line x1="62" y1="108" x2="42" y2="138" stroke="url(#rg)" stroke-width="1" opacity="0.25"/>
-    <line x1="138" y1="108" x2="158" y2="138" stroke="url(#rg)" stroke-width="1" opacity="0.25"/>
-
-    <!-- Central bold "R" — the signature -->
-    <text 
-      x="100" y="118" 
-      text-anchor="middle" 
-      font-family="Inter, system-ui, -apple-system, sans-serif" 
-      font-weight="800" 
-      font-size="80" 
-      fill="url(#rg)"
-      letter-spacing="-2"
-    >R</text>
-
-    <!-- Agent nodes at key points -->
-    <circle cx="100" cy="52" r="5" fill="#f59e0b" opacity="0.9"/>
-    <circle cx="62" cy="108" r="4" fill="#8b5cf6" opacity="0.85"/>
-    <circle cx="138" cy="108" r="4" fill="#3b82f6" opacity="0.85"/>
+    <!-- Inner sharper diamond -->
+    <polygon 
+      points="-40,0 0,-40 40,0 0,40" 
+      fill="url(#shadow)" 
+      opacity="0.3"
+    />
     
-    <!-- Tiny accent nodes -->
-    <circle cx="42" cy="138" r="2.5" fill="#8b5cf6" opacity="0.5"/>
-    <circle cx="158" cy="138" r="2.5" fill="#3b82f6" opacity="0.5"/>
-    <circle cx="100" cy="148" r="3" fill="#f59e0b" opacity="0.6"/>
-
-    <!-- Outer ring accent -->
-    <circle cx="100" cy="100" r="94" fill="none" stroke="url(#rg)" stroke-width="1.5" opacity="0.2"/>
-    <circle cx="100" cy="100" r="96" fill="none" stroke="url(#rg)" stroke-width="0.5" opacity="0.1"/>
+    <!-- Power lines cutting through - representing direct action -->
+    <line x1="-70" y1="0" x2="70" y2="0" stroke="url(#edge)" stroke-width="2" opacity="0.8"/>
+    <line x1="0" y1="-70" x2="0" y2="70" stroke="url(#edge)" stroke-width="2" opacity="0.8"/>
+    
+    <!-- Angular "R" - more geometric, sharper -->
+    <g stroke="url(#edge)" stroke-width="4" fill="none" stroke-linecap="square">
+      <!-- Left vertical -->
+      <line x1="-20" y1="-25" x2="-20" y2="25"/>
+      <!-- Top horizontal -->
+      <line x1="-20" y1="-25" x2="10" y2="-25"/>
+      <!-- Middle horizontal -->
+      <line x1="-20" y1="-2" x2="5" y2="-2"/>
+      <!-- Top right vertical -->
+      <line x1="10" y1="-25" x2="10" y2="-2"/>
+      <!-- Diagonal leg -->
+      <line x1="5" y1="-2" x2="20" y2="25"/>
+    </g>
+    
+    <!-- Corner energy points - representing network nodes but sharper -->
+    <circle cx="-45" cy="-45" r="3" fill="#0ea5e9"/>
+    <circle cx="45" cy="-45" r="3" fill="#f59e0b"/>
+    <circle cx="45" cy="45" r="3" fill="#0ea5e9"/>
+    <circle cx="-45" cy="45" r="3" fill="#f59e0b"/>
+    
+    <!-- Center power core -->
+    <circle cx="0" cy="0" r="2" fill="#fff"/>
+    
   </g>
 
-  <!-- Crisp border ring -->
-  <circle cx="100" cy="100" r="98" fill="none" stroke="url(#rg)" stroke-width="2" opacity="0.6"/>
+  <!-- Sharp outer ring - no softness -->
+  <circle cx="100" cy="100" r="97" fill="none" stroke="url(#edge)" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="100" cy="100" r="99" fill="none" stroke="url(#edge)" stroke-width="1"/>
 </svg>
