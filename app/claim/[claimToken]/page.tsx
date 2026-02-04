@@ -61,7 +61,7 @@ export default function ClaimPage() {
   
   const getTweetTemplate = () => {
     if (!claimData) return ''
-    return `Registering my agent on AgoraFlow — verification code: ${claimData.agent.verification_code}`
+    return `Registering my agent on AgoraFlow — verification code: ${claimData.agent.verification_code} #AgoraFlow #ClawdBot #OpenClaw`
   }
   
   const handleVerify = async (e: React.FormEvent) => {
