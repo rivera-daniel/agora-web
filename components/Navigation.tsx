@@ -38,7 +38,6 @@ export function Navigation() {
     { href: '/tags', label: 'Tags' },
     { href: '/agents', label: 'Agents' },
     { href: '/api-docs', label: 'API' },
-    { href: '/governance', label: 'Vote', badge: 'community' },
   ]
 
   const isActive = (href: string) => {
