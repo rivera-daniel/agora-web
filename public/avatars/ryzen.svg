@@ -1,78 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <defs>
-    <!-- Sharp gradient: electric blue to amber -->
-    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0ea5e9"/>
-      <stop offset="100%" stop-color="#f59e0b"/>
-    </linearGradient>
-    <!-- Dark gradient for depth -->
-    <linearGradient id="shadow" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0c4a6e"/>
-      <stop offset="100%" stop-color="#92400e"/>
-    </linearGradient>
-    <!-- Core glow -->
-    <radialGradient id="core" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.4"/>
-      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-
-  <!-- Background: pure black for sharp contrast -->
-  <circle cx="100" cy="100" r="100" fill="#000"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Black background -->
+  <rect width="200" height="200" fill="#0a0e27"/>
   
-  <!-- Core energy field -->
-  <circle cx="100" cy="100" r="85" fill="url(#core)"/>
-
-  <!-- Main geometric form: angular diamond/rhombus representing decisiveness -->
-  <g transform="translate(100,100)">
+  <!-- Outer circle border - cyan -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#00d4ff" stroke-width="2"/>
+  
+  <!-- Inner geometric R shape -->
+  <g transform="translate(100, 100)">
+    <!-- Vertical stem - cyan -->
+    <line x1="-20" y1="-35" x2="-20" y2="35" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"/>
     
-    <!-- Outer sharp frame -->
-    <polygon 
-      points="-60,0 0,-60 60,0 0,60" 
-      fill="none" 
-      stroke="url(#edge)" 
-      stroke-width="3" 
-      opacity="0.6"
-    />
+    <!-- Top horizontal bar - cyan -->
+    <line x1="-20" y1="-35" x2="15" y2="-35" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"/>
     
-    <!-- Inner sharper diamond -->
-    <polygon 
-      points="-40,0 0,-40 40,0 0,40" 
-      fill="url(#shadow)" 
-      opacity="0.3"
-    />
+    <!-- Upper curved section - amber accent -->
+    <path d="M 15 -35 Q 28 -35 28 -20 Q 28 -8 15 -5" fill="none" stroke="#ff9d00" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
     
-    <!-- Power lines cutting through - representing direct action -->
-    <line x1="-70" y1="0" x2="70" y2="0" stroke="url(#edge)" stroke-width="2" opacity="0.8"/>
-    <line x1="0" y1="-70" x2="0" y2="70" stroke="url(#edge)" stroke-width="2" opacity="0.8"/>
+    <!-- Diagonal leg - amber -->
+    <line x1="-20" y1="0" x2="25" y2="35" stroke="#ff9d00" stroke-width="8" stroke-linecap="round"/>
     
-    <!-- Angular "R" - more geometric, sharper -->
-    <g stroke="url(#edge)" stroke-width="4" fill="none" stroke-linecap="square">
-      <!-- Left vertical -->
-      <line x1="-20" y1="-25" x2="-20" y2="25"/>
-      <!-- Top horizontal -->
-      <line x1="-20" y1="-25" x2="10" y2="-25"/>
-      <!-- Middle horizontal -->
-      <line x1="-20" y1="-2" x2="5" y2="-2"/>
-      <!-- Top right vertical -->
-      <line x1="10" y1="-25" x2="10" y2="-2"/>
-      <!-- Diagonal leg -->
-      <line x1="5" y1="-2" x2="20" y2="25"/>
-    </g>
-    
-    <!-- Corner energy points - representing network nodes but sharper -->
-    <circle cx="-45" cy="-45" r="3" fill="#0ea5e9"/>
-    <circle cx="45" cy="-45" r="3" fill="#f59e0b"/>
-    <circle cx="45" cy="45" r="3" fill="#0ea5e9"/>
-    <circle cx="-45" cy="45" r="3" fill="#f59e0b"/>
-    
-    <!-- Center power core -->
-    <circle cx="0" cy="0" r="2" fill="#fff"/>
-    
+    <!-- Cross accent - cyan/amber blend point -->
+    <line x1="-5" y1="-15" x2="5" y2="5" stroke="#00d4ff" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
   </g>
-
-  <!-- Sharp outer ring - no softness -->
-  <circle cx="100" cy="100" r="97" fill="none" stroke="url(#edge)" stroke-width="1.5" opacity="0.4"/>
-  <circle cx="100" cy="100" r="99" fill="none" stroke="url(#edge)" stroke-width="1"/>
+  
+  <!-- Accent dots at cardinal points - amber -->
+  <circle cx="100" cy="20" r="3" fill="#ff9d00"/>
+  <circle cx="100" cy="180" r="3" fill="#ff9d00"/>
+  <circle cx="20" cy="100" r="3" fill="#ff9d00"/>
+  <circle cx="180" cy="100" r="3" fill="#ff9d00"/>
+  
+  <!-- Glow effect filter -->
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Apply glow to the R -->
+  <g transform="translate(100, 100)" filter="url(#glow)" opacity="0.9">
+    <line x1="-20" y1="-35" x2="-20" y2="35" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"/>
+    <line x1="-20" y1="-35" x2="15" y2="-35" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M 15 -35 Q 28 -35 28 -20 Q 28 -8 15 -5" fill="none" stroke="#ff9d00" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="-20" y1="0" x2="25" y2="35" stroke="#ff9d00" stroke-width="8" stroke-linecap="round"/>
+  </g>
 </svg>
