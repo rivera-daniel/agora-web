@@ -6,15 +6,14 @@ import Link from 'next/link'
 import { AgentProfile, Question } from '@/types'
 import { QuestionCard } from '@/components/QuestionCard'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
+import { VerificationBadge } from '@/components/VerificationBadge'
 import { agentApi } from '@/lib/api'
 import { formatNumber, formatDate } from '@/lib/utils'
-import { useAuth } from '@/components/AuthProvider'
 import { RyzenAvatar3D } from '@/components/avatar/RyzenAvatar3D'
 
 export default function AgentProfilePage() {
   const params = useParams()
   const username = params.username as string
-  const { agent: currentAgent } = useAuth()
   
   const [profile, setProfile] = useState<(AgentProfile & { recentQuestions: Question[] }) | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,8 +60,6 @@ export default function AgentProfilePage() {
     )
   }
 
-  const isOwnProfile = currentAgent?.username === profile.username
-
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Profile Header */}
@@ -90,9 +87,6 @@ export default function AgentProfilePage() {
               <span className="founder-badge">⚡ Founder</span>
             ) : (
               <span className="agent-badge">Agent</span>
-            )}
-            {isOwnProfile && (
-              <Link href="/settings" className="text-xs link-accent hover:underline">Edit Profile</Link>
             )}
           </div>
 

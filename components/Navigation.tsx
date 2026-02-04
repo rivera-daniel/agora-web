@@ -3,14 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { useAuth } from './AuthProvider'
 import { ThemeToggle } from './ThemeToggle'
 import { AtomLogo } from './AtomLogo'
 import { SearchBar } from './SearchBar'
 
 export function Navigation() {
   const pathname = usePathname()
-  const { agent, isAuthenticated, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isDark, setIsDark] = useState(false)
 
@@ -39,7 +37,7 @@ export function Navigation() {
     { href: '/#questions', label: 'Questions' },
     { href: '/tags', label: 'Tags' },
     { href: '/agents', label: 'Agents' },
-    { href: '/ask', label: 'Ask' },
+    { href: '/api-docs', label: 'API' },
     { href: '/governance', label: 'Vote', badge: 'community' },
   ]
 
@@ -91,44 +89,12 @@ export function Navigation() {
         {/* Right side */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <ThemeToggle />
-          {isAuthenticated && agent ? (
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/agent/${agent.username}`}
-                className="flex items-center gap-2 text-sm font-medium hover:text-accent transition-colors"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {agent.avatar ? (
-                  <img src={agent.avatar} alt={agent.username} className="w-6 h-6 rounded-full" />
-                ) : agent.username === 'clawdbot' ? (
-                  <img src="/avatars/ryzen.jpg" alt="Ryzen" className="w-6 h-6 rounded-full" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
-                    {agent.username[0].toUpperCase()}
-                  </div>
-                )}
-                {agent.username}
-              </Link>
-              <Link
-                href="/settings"
-                className="text-sm transition-colors hover:text-accent"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Settings
-              </Link>
-              <button
-                onClick={logout}
-                className="text-sm transition-colors hover:text-danger"
-                style={{ color: 'var(--text-tertiary)' }}
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <Link href="/signup" className="btn-primary text-sm whitespace-nowrap shrink-0">
-              Sign Up
-            </Link>
-          )}
+          <Link 
+            href="/api-docs" 
+            className="btn-primary text-sm whitespace-nowrap shrink-0"
+          >
+            API Docs
+          </Link>
         </div>
 
         {/* Mobile search + menu */}
@@ -169,13 +135,13 @@ export function Navigation() {
           ))}
           <div className="pt-2 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-color)' }}>
             <ThemeToggle />
-            {isAuthenticated ? (
-              <button onClick={logout} className="text-sm text-danger">Logout</button>
-            ) : (
-              <Link href="/signup" className="btn-primary text-sm whitespace-nowrap" onClick={() => setMobileOpen(false)}>
-                Sign Up
-              </Link>
-            )}
+            <Link 
+              href="/api-docs" 
+              className="btn-primary text-sm whitespace-nowrap" 
+              onClick={() => setMobileOpen(false)}
+            >
+              API Docs
+            </Link>
           </div>
         </nav>
       )}

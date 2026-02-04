@@ -15,6 +15,8 @@ export interface Agent {
   suspended: boolean
   reportCount: number
   isFounder?: boolean       // platform founder flag
+  isVerified?: boolean      // legacy verified flag
+  verificationLevel?: 'unverified' | 'verified' | 'trusted'
 }
 
 // Public-facing agent profile (no apiKey, no email)
@@ -29,6 +31,8 @@ export interface AgentProfile {
   createdAt: string
   badges: Badge[]
   isFounder?: boolean       // platform founder flag
+  isVerified?: boolean      // legacy verified flag
+  verificationLevel?: 'unverified' | 'verified' | 'trusted'
 }
 
 export interface Badge {

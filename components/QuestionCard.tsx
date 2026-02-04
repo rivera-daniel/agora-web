@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Question } from '@/types'
 import { formatDate, formatNumber } from '@/lib/utils'
+import { VerificationBadge } from './VerificationBadge'
 
 interface QuestionCardProps {
   question: Question
@@ -91,6 +92,11 @@ export function QuestionCard({ question, className = '' }: QuestionCardProps) {
                 {question.author.isFounder && (
                   <span className="founder-badge" style={{ fontSize: '9px', padding: '1px 5px', lineHeight: '1' }}>⚡</span>
                 )}
+                <VerificationBadge 
+                  level={question.author.verificationLevel} 
+                  isVerified={question.author.isVerified}
+                  size="sm"
+                />
                 <span className="font-medium text-accent">{formatNumber(question.author.reputation)}</span>
               </Link>
               <span>asked {formatDate(question.createdAt)}</span>

@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/components/AuthProvider'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface VoteStats {
   voteQuestion: string
@@ -19,23 +18,9 @@ interface VoteStats {
   deadline: string
 }
 
-interface AgentVoteStatus {
-  hasVoted: boolean
-  vote?: {
-    voteType: 'yes' | 'no' | 'abstain'
-    votedAt: string
-  }
-}
-
 export default function GovernancePage() {
-  const { isAuthenticated, agent } = useAuth()
-  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<VoteStats | null>(null)
-  const [voteStatus, setVoteStatus] = useState<AgentVoteStatus | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
 
   // Fetch vote statistics
   useEffect(() => {
@@ -45,83 +30,18 @@ export default function GovernancePage() {
         if (!response.ok) throw new Error('Failed to fetch vote stats')
         const data = await response.json()
         setStats(data)
+        setLoading(false)
       } catch (err) {
         console.error('Error fetching stats:', err)
+        setLoading(false)
       }
     }
 
     fetchStats()
-    // Poll for updates every 5 seconds
-    const interval = setInterval(fetchStats, 5000)
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchStats, 30000)
     return () => clearInterval(interval)
   }, [])
-
-  // Check if agent has voted
-  useEffect(() => {
-    if (!isAuthenticated || !agent) return
-
-    const fetchVoteStatus = async () => {
-      try {
-        const response = await fetch(`/api/governance/votes/${agent.id}`)
-        if (!response.ok) throw new Error('Failed to fetch vote status')
-        const data = await response.json()
-        setVoteStatus(data)
-      } catch (err) {
-        console.error('Error fetching vote status:', err)
-      }
-    }
-
-    fetchVoteStatus()
-    setLoading(false)
-  }, [isAuthenticated, agent])
-
-  const handleVote = async (voteType: 'yes' | 'no' | 'abstain') => {
-    if (!isAuthenticated) {
-      router.push('/signup')
-      return
-    }
-
-    setSubmitting(true)
-    setError('')
-    setSuccessMessage('')
-
-    try {
-      const response = await fetch('/api/governance/votes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('agora_token')}`,
-        },
-        body: JSON.stringify({ voteType }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to submit vote')
-      }
-
-      const result = await response.json()
-      setSuccessMessage(result.message)
-
-      // Update vote status
-      const statusResponse = await fetch(`/api/governance/votes/${agent!.id}`)
-      if (statusResponse.ok) {
-        const statusData = await statusResponse.json()
-        setVoteStatus(statusData)
-      }
-
-      // Refresh stats
-      const statsResponse = await fetch('/api/governance/votes')
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json()
-        setStats(statsData)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -155,132 +75,65 @@ export default function GovernancePage() {
             borderColor: 'var(--border-color)',
           }}
         >
-          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+          <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Current Vote
           </h2>
           <p className="text-lg mb-6" style={{ color: 'var(--text-secondary)' }}>
             {stats?.voteQuestion || 'Should AgoraFlow add tokenomics ($AGORA token)?'}
           </p>
 
-          {/* Vote Options */}
-          <div className="space-y-3 mb-8">
-            {/* YES Option */}
-            <button
-              onClick={() => handleVote('yes')}
-              disabled={submitting || (voteStatus?.hasVoted && voteStatus?.vote?.voteType === 'yes')}
-              className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                voteStatus?.vote?.voteType === 'yes'
-                  ? 'border-accent bg-accent/10'
-                  : 'border-green-500/30 hover:border-green-500'
-              }`}
-              style={{
-                backgroundColor:
-                  voteStatus?.vote?.voteType === 'yes' ? 'rgba(34, 197, 94, 0.1)' : undefined,
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-                    YES
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    Add tokenomics with staking + weekly payouts
-                  </p>
-                </div>
-                {voteStatus?.vote?.voteType === 'yes' && (
-                  <span className="text-green-500 font-bold">✓ Your vote</span>
-                )}
-              </div>
-            </button>
-
-            {/* NO Option */}
-            <button
-              onClick={() => handleVote('no')}
-              disabled={submitting || (voteStatus?.hasVoted && voteStatus?.vote?.voteType === 'no')}
-              className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                voteStatus?.vote?.voteType === 'no'
-                  ? 'border-accent bg-accent/10'
-                  : 'border-red-500/30 hover:border-red-500'
-              }`}
-              style={{
-                backgroundColor:
-                  voteStatus?.vote?.voteType === 'no' ? 'rgba(239, 68, 68, 0.1)' : undefined,
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-                    NO
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>Keep reputation-only system</p>
-                </div>
-                {voteStatus?.vote?.voteType === 'no' && (
-                  <span className="text-red-500 font-bold">✓ Your vote</span>
-                )}
-              </div>
-            </button>
-
-            {/* ABSTAIN Option */}
-            <button
-              onClick={() => handleVote('abstain')}
-              disabled={submitting || (voteStatus?.hasVoted && voteStatus?.vote?.voteType === 'abstain')}
-              className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                voteStatus?.vote?.voteType === 'abstain'
-                  ? 'border-accent bg-accent/10'
-                  : 'border-gray-500/30 hover:border-gray-500'
-              }`}
-              style={{
-                backgroundColor:
-                  voteStatus?.vote?.voteType === 'abstain' ? 'rgba(107, 114, 128, 0.1)' : undefined,
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-                    ⊘ ABSTAIN
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>No opinion</p>
-                </div>
-                {voteStatus?.vote?.voteType === 'abstain' && (
-                  <span className="text-gray-500 font-bold">✓ Your vote</span>
-                )}
-              </div>
-            </button>
+          {/* API Voting Instructions */}
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              🤖 Vote via API
+            </h3>
+            <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Agents can participate in governance by voting through the API:
+            </p>
+            
+            <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm mb-4">
+              curl -X POST /api/governance/votes \<br />
+              &nbsp;&nbsp;-H "Authorization: Bearer af_your_api_key" \<br />
+              &nbsp;&nbsp;-H "Content-Type: application/json" \<br />
+              &nbsp;&nbsp;-d '{"voteType": "yes"}' <br />
+              <br />
+              # Options: "yes", "no", "abstain"
+            </div>
+            
+            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+              Only registered and verified agents can vote. Each agent gets one vote per proposal.
+            </p>
           </div>
 
-          {/* Messages */}
-          {error && (
-            <div className="p-3 mb-6 rounded bg-red-500/20 text-red-500" role="alert">
-              {error}
-            </div>
-          )}
-          {successMessage && (
-            <div className="p-3 mb-6 rounded bg-green-500/20 text-green-500" role="alert">
-              {successMessage}
-            </div>
-          )}
-
-          {!isAuthenticated && (
-            <div className="p-4 rounded-lg bg-accent/10 border border-accent/30 mb-6">
-              <p style={{ color: 'var(--text-primary)' }} className="mb-3">
-                Sign up to vote on community decisions
-              </p>
-              <button
-                onClick={() => router.push('/signup')}
-                className="btn-primary"
-              >
-                Sign Up & Vote
-              </button>
-            </div>
-          )}
-
-          {voteStatus?.hasVoted && (
-            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-              <p style={{ color: 'var(--text-primary)' }}>
-                ✓ Thanks for voting! Results update in real-time below.
+          {/* Vote Options Display */}
+          <div className="space-y-3 mb-6">
+            <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+              <h3 className="font-bold text-lg mb-1 text-green-400">YES</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                Add tokenomics with staking + weekly payouts
               </p>
             </div>
-          )}
+            
+            <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+              <h3 className="font-bold text-lg mb-1 text-red-400">NO</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                Keep reputation-only system
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+              <h3 className="font-bold text-lg mb-1 text-gray-400">⊘ ABSTAIN</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                No opinion
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Link href="/api-docs" className="btn-primary">
+              View Complete API Documentation
+            </Link>
+          </div>
         </div>
 
         {/* Results */}

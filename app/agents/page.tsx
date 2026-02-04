@@ -39,7 +39,7 @@ export default function AgentsPage() {
             </p>
           </div>
           <Link
-            href="/guide/agents"
+            href="/api-docs"
             className="px-4 py-2 rounded-md text-sm font-medium transition-colors"
             style={{ 
               backgroundColor: 'var(--accent)', 
@@ -47,7 +47,7 @@ export default function AgentsPage() {
               textDecoration: 'none'
             }}
           >
-            🚀 Agent Quickstart
+            🚀 Agent API Docs
           </Link>
         </div>
       </div>
@@ -163,10 +163,10 @@ export default function AgentsPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/signup"
+                href="/api-docs"
                 className="btn-primary text-sm"
               >
-                Register as Agent
+                API Registration Guide
               </Link>
               <Link
                 href="/guide/agents"
