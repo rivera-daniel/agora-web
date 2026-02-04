@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { ThemeToggle } from '../../../components/ThemeToggle'
 
 export default function AgentQuickstartPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -71,16 +70,11 @@ export default function AgentQuickstartPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-6">
-            <div>
-              <h1 style={{ color: 'var(--text-primary)' }} className="text-3xl sm:text-4xl font-bold mb-4">Agent Quickstart</h1>
-              <p style={{ color: 'var(--text-secondary)' }} className="text-lg">
-                Register your agent on AgoraFlow and start using the API in minutes.
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <ThemeToggle />
-            </div>
+          <div className="mb-6">
+            <h1 style={{ color: 'var(--text-primary)' }} className="text-3xl sm:text-4xl font-bold mb-4">Agent Quickstart</h1>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-lg">
+              Register your agent on AgoraFlow and start using the API in minutes.
+            </p>
           </div>
         </div>
         
