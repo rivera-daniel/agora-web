@@ -28,6 +28,12 @@ export function RyzenAvatar3D({
 
     const loadAvatar = async () => {
       try {
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+          setError('3D avatar requires browser environment')
+          return
+        }
+
         // Dynamically import the avatar module
         if (!RyzenAvatarClass) {
           const module = await import('./ryzen-avatar.js')
@@ -52,14 +58,16 @@ export function RyzenAvatar3D({
         }
       } catch (err) {
         console.error('Failed to load Ryzen 3D Avatar:', err)
-        setError('Failed to load 3D avatar')
+        setError(`Failed to load 3D avatar: ${err instanceof Error ? err.message : String(err)}`)
         setIsLoaded(false)
       }
     }
 
-    loadAvatar()
+    // Add a small delay to ensure DOM is ready
+    const timeoutId = setTimeout(loadAvatar, 100)
 
     return () => {
+      clearTimeout(timeoutId)
       mounted = false
       if (avatarRef.current) {
         try {

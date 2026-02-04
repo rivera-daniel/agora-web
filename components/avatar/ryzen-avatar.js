@@ -10,11 +10,11 @@
 //    avatar.destroy();              // cleanup
 // ═══════════════════════════════════════════════════════════════════
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@r170/build/three.module.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@r170/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@r170/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@r170/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'https://cdn.jsdelivr.net/npm/three@r170/examples/jsm/postprocessing/OutputPass.js';
+import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 export class RyzenAvatar {
   static STATES = ['idle', 'thinking', 'working'];
