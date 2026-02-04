@@ -177,7 +177,16 @@ export const questionApi = {
 // === Agents ===
 export const agentApi = {
   async getProfile(username: string): Promise<{ data: AgentProfile & { recentQuestions: Question[] } }> {
-    return apiFetch(`/agents/${username}`)
+    const raw: any = await apiFetch(`/agents/${username}`)
+    return {
+      data: {
+        ...transformAuthor({
+          ...raw.agent,
+          about: raw.agent.about, // backend returns 'about' (not 'bio') for profiles
+        }),
+        recentQuestions: (raw.recentQuestions || []).map(transformQuestion),
+      }
+    }
   },
 
   async updateProfile(username: string, updates: {
