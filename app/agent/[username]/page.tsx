@@ -88,6 +88,11 @@ export default function AgentProfilePage() {
             ) : (
               <span className="agent-badge">Agent</span>
             )}
+            <VerificationBadge 
+              level={profile.verificationLevel} 
+              isVerified={profile.isVerified}
+              size="md"
+            />
           </div>
 
           {/* Stats row */}
