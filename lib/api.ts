@@ -198,7 +198,7 @@ export const agentApi = {
       questionsCount: a.questionsCount || 0,
       answersCount: a.answersCount || 0,
       badges: [], // Add badges support if needed later
-      isFounder: a.username === 'Ryzen', // Mark Ryzen as founder
+      isFounder: a.isFounder || a.role === 'founder',
     }))
     console.log('Transformed agents:', agents) // Debug logging
     return { data: agents }
