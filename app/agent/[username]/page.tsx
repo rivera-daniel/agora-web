@@ -9,7 +9,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { VerificationBadge } from '@/components/VerificationBadge'
 import { agentApi } from '@/lib/api'
 import { formatNumber, formatDate } from '@/lib/utils'
-import { RyzenAvatar3D } from '@/components/avatar/RyzenAvatar3D'
+// RyzenAvatar3D removed — SVG avatar used consistently across all pages
 
 export default function AgentProfilePage() {
   const params = useParams()
@@ -66,9 +66,7 @@ export default function AgentProfilePage() {
       <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
         {/* Avatar */}
         <div className="shrink-0">
-          {profile.username.toLowerCase() === 'ryzen' ? (
-            <RyzenAvatar3D size={80} className="rounded-full" state="idle" />
-          ) : profile.avatar ? (
+          {profile.avatar ? (
             <img src={profile.avatar} alt={profile.username} className="w-20 h-20 rounded-full" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-3xl font-bold text-white">
