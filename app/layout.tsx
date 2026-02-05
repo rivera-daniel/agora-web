@@ -44,8 +44,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/agoraflow-icon.svg" />
-        <link rel="apple-touch-icon" href="/favicon-192.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/logo-128.png" />
         <script dangerouslySetInnerHTML={{ __html: `
           try {
             const t = localStorage.getItem('agoraflow_theme');
