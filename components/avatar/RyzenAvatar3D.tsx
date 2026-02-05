@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 // Dynamically import the RyzenAvatar class
 let RyzenAvatarClass: any = null
@@ -18,81 +18,70 @@ export function RyzenAvatar3D({
   state = 'idle',
   onStateChange 
 }: RyzenAvatar3DProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  // Use a callback ref so React never tracks children of this node
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const avatarRef = useRef<any>(null)
+  const mountedRef = useRef(true)
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let mounted = true
-
-    const loadAvatar = async () => {
-      try {
-        // Check if we're in a browser environment
-        if (typeof window === 'undefined') {
-          setError('3D avatar requires browser environment')
-          return
-        }
-
-        // Dynamically import the avatar module
-        if (!RyzenAvatarClass) {
-          const module = await import('./ryzen-avatar.js')
-          RyzenAvatarClass = module.RyzenAvatar
-        }
-
-        // Create avatar instance
-        if (containerRef.current && RyzenAvatarClass && mounted) {
-          // Clear any existing content
-          containerRef.current.innerHTML = ''
-          
-          avatarRef.current = new RyzenAvatarClass(containerRef.current, {
-            size,
-            particles: 2000, // Reduced for profile view performance
-            bloom: true,
-            onStateChange
-          })
-
-          // Set initial state
-          avatarRef.current.setState(state)
-          setIsLoaded(true)
-        }
-      } catch (err) {
-        console.error('Failed to load Ryzen 3D Avatar:', err)
-        setError(`Failed to load 3D avatar: ${err instanceof Error ? err.message : String(err)}`)
-        setIsLoaded(false)
-      }
+  const attachRef = useCallback((node: HTMLDivElement | null) => {
+    // Cleanup previous instance
+    if (avatarRef.current) {
+      try { avatarRef.current.destroy() } catch {}
+      avatarRef.current = null
     }
+    containerRef.current = node
+    if (node) initAvatar(node)
+  }, [size])
 
-    // Add a small delay to ensure DOM is ready
-    const timeoutId = setTimeout(loadAvatar, 100)
+  const initAvatar = async (node: HTMLDivElement) => {
+    try {
+      if (typeof window === 'undefined') return
 
+      if (!RyzenAvatarClass) {
+        const module = await import('./ryzen-avatar.js')
+        RyzenAvatarClass = module.RyzenAvatar
+      }
+
+      if (!mountedRef.current || !node.isConnected) return
+
+      avatarRef.current = new RyzenAvatarClass(node, {
+        size,
+        particles: 2000,
+        bloom: true,
+        onStateChange
+      })
+
+      avatarRef.current.setState(state)
+      setIsLoaded(true)
+    } catch (err) {
+      console.error('Failed to load Ryzen 3D Avatar:', err)
+      setError(`Failed to load 3D avatar: ${err instanceof Error ? err.message : String(err)}`)
+      setIsLoaded(false)
+    }
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    mountedRef.current = true
     return () => {
-      clearTimeout(timeoutId)
-      mounted = false
+      mountedRef.current = false
       if (avatarRef.current) {
-        try {
-          avatarRef.current.destroy()
-        } catch (err) {
-          console.error('Error destroying avatar:', err)
-        }
+        try { avatarRef.current.destroy() } catch {}
         avatarRef.current = null
       }
     }
-  }, [size, onStateChange])
+  }, [])
 
   // Update state when prop changes
   useEffect(() => {
     if (avatarRef.current && isLoaded) {
-      try {
-        avatarRef.current.setState(state)
-      } catch (err) {
-        console.error('Error setting avatar state:', err)
-      }
+      try { avatarRef.current.setState(state) } catch {}
     }
   }, [state, isLoaded])
 
   if (error) {
-    // Fallback to SVG avatar if 3D fails
     return (
       <img 
         src="/avatars/ryzen.svg" 
@@ -104,25 +93,26 @@ export function RyzenAvatar3D({
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className={`relative ${className}`}
-      style={{ 
-        width: size, 
-        height: size,
-        opacity: isLoaded ? 1 : 0,
-        transition: 'opacity 0.3s ease-in-out'
-      }}
-    >
-      {/* Loading state */}
-      {!isLoaded && (
+    <>
+      {/* Three.js owns this node entirely — React has no children to reconcile */}
+      <div 
+        ref={attachRef}
+        className={`relative ${className}`}
+        style={{ 
+          width: size, 
+          height: size,
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+      />
+      {!isLoaded && !error && (
         <div 
-          className="absolute inset-0 rounded-full bg-gray-800 animate-pulse flex items-center justify-center"
-          style={{ width: size, height: size }}
+          className={`rounded-full bg-gray-800 animate-pulse flex items-center justify-center ${className}`}
+          style={{ width: size, height: size, position: 'absolute' }}
         >
           <div className="text-white text-lg font-bold">R</div>
         </div>
       )}
-    </div>
+    </>
   )
 }
