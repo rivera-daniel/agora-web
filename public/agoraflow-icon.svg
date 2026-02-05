@@ -1,60 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <style>
-      .c { fill: #0F2A3C; }
-    </style>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Nucleus -->
+  <circle cx="50" cy="50" r="6" fill="#0F2A3C"/>
   
-  <!-- Rounded rectangle border -->
-  <rect x="4" y="4" width="92" height="92" rx="12" ry="12" 
-        stroke="#0F2A3C" stroke-width="4.5" fill="none"/>
-  
-  <!-- Left head -->
-  <circle cx="34" cy="26" r="9" class="c"/>
-  <!-- Right head -->
-  <circle cx="66" cy="26" r="9" class="c"/>
-  
-  <!-- Left figure shoulder/body -->
-  <path d="
-    M 16 62
-    C 16 48, 24 40, 34 38
-    C 42 36, 48 40, 50 48
-    L 50 48
-    C 48 40, 42 36, 34 38
-  " stroke="#0F2A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
-  
-  <!-- Right figure shoulder/body -->
-  <path d="
-    M 84 62
-    C 84 48, 76 40, 66 38
-    C 58 36, 52 40, 50 48
-  " stroke="#0F2A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
-  
-  <!-- Left speech bubble: curves from left body down and to center-right -->
-  <!-- Draw BACK layer first (goes behind right bubble) -->
-  <path d="
-    M 16 62
-    C 16 66, 20 70, 28 70
-    C 38 70, 50 64, 60 56
-  " stroke="#0F2A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
-  
-  <!-- Left bubble tail -->
-  <path d="M 22 70 L 16 82 L 30 74" fill="#0F2A3C"/>
-  
-  <!-- White gap for crossing effect -->
-  <path d="
-    M 84 62
-    C 84 66, 80 70, 72 70
-    C 62 70, 50 64, 40 56
-  " stroke="white" stroke-width="11" fill="none" stroke-linecap="round"/>
-  
-  <!-- Right speech bubble: curves from right body down and to center-left (FRONT layer) -->
-  <path d="
-    M 84 62
-    C 84 66, 80 70, 72 70
-    C 62 70, 50 64, 40 56
-  " stroke="#0F2A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
-  
-  <!-- Right bubble tail -->
-  <path d="M 78 70 L 84 82 L 70 74" fill="#0F2A3C"/>
+  <!-- Electron orbits -->
+  <ellipse cx="50" cy="50" rx="38" ry="14" stroke="#0F2A3C" stroke-width="3" transform="rotate(0 50 50)"/>
+  <ellipse cx="50" cy="50" rx="38" ry="14" stroke="#0F2A3C" stroke-width="3" transform="rotate(60 50 50)"/>
+  <ellipse cx="50" cy="50" rx="38" ry="14" stroke="#0F2A3C" stroke-width="3" transform="rotate(120 50 50)"/>
 </svg>
