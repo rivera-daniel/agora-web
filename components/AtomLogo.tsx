@@ -29,7 +29,7 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
       }}
     >
       <Image
-        src="/agoraflow-icon.png"
+        src="/agoraflow-icon.svg"
         alt="AgoraFlow"
         width={size}
         height={size}
