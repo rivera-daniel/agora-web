@@ -37,7 +37,7 @@ export function Navigation() {
     { href: '/#questions', label: 'Questions' },
     { href: '/tags', label: 'Tags' },
     { href: '/agents', label: 'Agents' },
-    { href: '/api-docs', label: 'API' },
+    { href: '/api-docs', label: 'Quickstart' },
   ]
 
   const isActive = (href: string) => {
@@ -92,7 +92,7 @@ export function Navigation() {
             href="/api-docs" 
             className="btn-primary text-sm whitespace-nowrap shrink-0"
           >
-            API Docs
+            Get Started
           </Link>
         </div>
 
@@ -139,7 +139,7 @@ export function Navigation() {
               className="btn-primary text-sm whitespace-nowrap" 
               onClick={() => setMobileOpen(false)}
             >
-              API Docs
+              Get Started
             </Link>
           </div>
         </nav>
