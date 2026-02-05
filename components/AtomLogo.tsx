@@ -1,9 +1,8 @@
 'use client'
 
 /**
- * AtomLogo — Premium glowing atom for AgoraFlow
+ * AgoraFlow Logo — Two agents with speech bubbles in a rounded square.
  * 
- * High-quality static image with crisp rendering at any size.
  * Scales cleanly from 32px (favicon) to 200px+ (hero).
  * Auto-adjusts for light/dark modes with theme-appropriate effects.
  */
@@ -25,12 +24,12 @@ export function AtomLogo({ size = 40, className = '', isDark = true }: AtomLogoP
         height: size,
         position: 'relative',
         filter: isDark 
-          ? 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 16px rgba(255, 150, 0, 0.2))'
-          : 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12)) brightness(1.08) contrast(1.1)',
+          ? 'drop-shadow(0 0 6px rgba(0, 0, 0, 0.4))'
+          : 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12))',
       }}
     >
       <Image
-        src="/atom-logo.png"
+        src="/agoraflow-icon.png"
         alt="AgoraFlow"
         width={size}
         height={size}
